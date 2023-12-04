@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>WebStick</title>
+    <script src="joy.js"></script>
+    <style>
+        * {
+            touch-action: none;
+            color: white;
+            user-select: none !important;
+            -webkit-touch-callout: none;
+            -webkit-user-callout: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            -webkit-user-modify: none;
+            -webkit-highlight: none;
+        }
+
+        div {
+            touch-action: none;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+
+        body {
+            margin: 0;
+            background-color: black;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none !important;
+        }
+
+        .shoulder {
+            background-color: red;
+            width: 150px;
+            height: 40px;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none !important;
+        }
+
+        .shoulder:active {
+            background-color: darkred;
+        }
+
+        .faceButton {
+            background-color: blue;
+            width: 60px;
+            height: 60px;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none !important;
+        }
+
+        .faceButton:active {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: fixed; top: 0; left: 0">
+        <div id="triggerL" class="shoulder">L2</div>
+        <div id="shoulderL" class="shoulder">L1</div>
+    </div>
+    <div style="position: fixed; top: 0; right: 0">
+        <div id="triggerR" class="shoulder">R2</div>
+        <div id="shoulderR" class="shoulder">R1</div>
+    </div>
+    <center>
+        <div style="position: fixed; width: 100vw; top: 20%;">
+            <center>
+                <div id="back" class="faceButton" style="display: inline-block">B</div>
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+                <div id="start" class="faceButton" style="display: inline-block">S</div>
+            </center>
+        </div>
+    </center>
+    <div style="position: fixed; bottom: 20px; left: 0">
+        <center>
+            <div id="hatN" class="faceButton" style="touch-action: none;">N</div>
+            <div id="hatW" class="faceButton" style="display: inline-block; touch-action: none;">W</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="hatE" class="faceButton" style="display: inline-block; touch-action: none;">E</div>
+            <div id="hatS" class="faceButton" style="touch-action: none;">S</div>
+        </center>
+    </div>
+    <div style="position: fixed; bottom: 20px; right: 0">
+        <center>
+            <div id="faceX" class="faceButton" style="touch-action: none;">X</div>
+            <div id="faceY" class="faceButton" style="display: inline-block; touch-action: none;">Y</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="faceA" class="faceButton" style="display: inline-block; touch-action: none;">A</div>
+            <div id="faceB" class="faceButton" style="touch-action: none;">B</div>
+        </center>
+    </div>
+    <div style="position: fixed; bottom: 0; left: 150px">
+        <div id="leftStick" style="width:150px;height:150px;margin-bottom:20px;"></div>
+    </div>
+    <div style="position: fixed; bottom: 0; right: 150px">
+        <div id="rightStick" style="width:150px;height:150px;margin-bottom:20px;"></div>
+    </div>
+    <script>
+        if (window.matchMedia("(orientation: portrait)").matches) {
+            window.alert("Please rotate to landscape mode")
+        }
+
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        document.ondblclick = function(e) {
+            e.preventDefault();
+        }
+
+        var leftOptions = {
+            zone: document.getElementById('leftStick'),
+            mode: 'static',
+            position: {
+                top: '75px',
+                left: '75px'
+            }
+        };
+        var leftManager = nipplejs.create(leftOptions);
+
+        leftManager.on("move", (evt, nipple) => {
+            var x = nipple.instance.frontPosition.x / leftOptions.zone.offsetWidth * 3;
+            var y = nipple.instance.frontPosition.y / leftOptions.zone.offsetHeight * 3;
+
+            x = Math.max(-1, Math.min(1, x));
+            y = Math.max(-1, Math.min(1, y));
+
+            ws.send(`LEFT STICK ${x} ${y*-1}`)
+        })
+
+        leftManager.on("end", () => {
+            ws.send(`LEFT STICK 0 0`)
+        })
+
+        var rightOptions = {
+            zone: document.getElementById('rightStick'),
+            mode: 'static',
+            position: {
+                top: '75px',
+                left: '75px'
+            }
+        };
+        var rightManager = nipplejs.create(rightOptions);
+        rightManager.on("move", (evt, nipple) => {
+            var x = nipple.instance.frontPosition.x / rightOptions.zone.offsetWidth * 3;
+            var y = nipple.instance.frontPosition.y / rightOptions.zone.offsetHeight * 3;
+
+            x = Math.max(-1, Math.min(1, x));
+            y = Math.max(-1, Math.min(1, y));
+
+            ws.send(`RIGHT STICK ${x} ${y*-1}`)
+        })
+
+        rightManager.on("end", () => {
+            ws.send(`RIGHT STICK 0 0`)
+        })
+
+        var ws = new WebSocket(`ws://${document.location.hostname}:8779`)
+
+        document.getElementById("faceA").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("A DOWN")
+        })
+
+        document.getElementById("faceA").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("A UP")
+        })
+
+        document.getElementById("faceB").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("B DOWN")
+        })
+
+        document.getElementById("faceB").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("B UP")
+        })
+
+        document.getElementById("faceX").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("X DOWN")
+        })
+
+        document.getElementById("faceX").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("X UP")
+        })
+
+        document.getElementById("faceY").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("Y DOWN")
+        })
+
+        document.getElementById("faceY").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("Y UP")
+        })
+
+        document.getElementById("hatN").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT N DOWN")
+        })
+
+        document.getElementById("hatN").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT N UP")
+        })
+
+        document.getElementById("hatS").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT S DOWN")
+        })
+
+        document.getElementById("hatS").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT S UP")
+        })
+
+        document.getElementById("hatW").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT W DOWN")
+        })
+
+        document.getElementById("hatW").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT W UP")
+        })
+
+        document.getElementById("hatE").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT E DOWN")
+        })
+
+        document.getElementById("hatE").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("HAT E UP")
+        })
+
+        document.getElementById("back").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("BACK DOWN")
+        })
+
+        document.getElementById("back").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("BACK UP")
+        })
+
+        document.getElementById("start").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("START DOWN")
+        })
+
+        document.getElementById("start").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("START UP")
+        })
+
+        document.getElementById("shoulderL").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("SHOULDER L DOWN")
+        })
+
+        document.getElementById("shoulderL").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("SHOULDER L UP")
+        })
+
+        document.getElementById("shoulderR").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("SHOULDER R DOWN")
+        })
+
+        document.getElementById("shoulderR").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("SHOULDER R UP")
+        })
+
+        document.getElementById("triggerL").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("TRIGGER L DOWN")
+        })
+
+        document.getElementById("triggerL").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("TRIGGER L UP")
+        })
+
+        document.getElementById("triggerR").addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+            ws.send("TRIGGER R DOWN")
+        })
+
+        document.getElementById("triggerR").addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+            ws.send("TRIGGER R UP")
+        })
+    </script>
+</body>
+</html>

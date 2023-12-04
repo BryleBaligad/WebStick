@@ -1,0 +1,16 @@
+{
+  "name": "webstick",
+  "version": "0.0.1",
+  "description": "web-based xinput controller",
+  "main": "webstick.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bryle Baligad",
+  "license": "ISC",
+  "dependencies": {
+    "@evilazio/vgen-xbox": "^1.0.3",
+    "qrcode-terminal": "^0.12.0",
+    "ws": "^8.14.2"
+  }
+}

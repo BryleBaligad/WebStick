@@ -162,6 +162,14 @@
 
         var ws = new WebSocket(`ws://${document.location.hostname}:8779`)
 
+        document.body.addEventListener('touchstart', (evt) => {
+            evt.preventDefault()
+        })
+
+        document.body.addEventListener('touchend', (evt) => {
+            evt.preventDefault()
+        })
+
         document.getElementById("faceA").addEventListener('touchstart', (evt) => {
             evt.preventDefault()
             ws.send("A DOWN")

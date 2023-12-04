@@ -59,12 +59,22 @@
             border-radius: 100px;
         }
 
+        button {
+            color: black
+        }
+
         /* .faceButton:active {
             background-color: darkblue;
         } */
     </style>
 </head>
 <body>
+    <div style="position: fixed; width: 100vw; top: 0; left: 0;">
+        <center>
+            <button id="reload">Reload</button>
+            <button id="toggleTriggers">Toggle Triggers</button>
+        </center>
+    </div>
     <div style="position: fixed; top: 0; left: 0">
         <div id="triggerL" class="shoulder">L2</div>
         <div id="shoulderL" class="shoulder">L1</div>
@@ -107,6 +117,25 @@
             window.alert("Please rotate to landscape mode")
         }
 
+        var triggersEnabled = true
+        function toggleTriggers() {
+            if (triggersEnabled) {
+                document.getElementById("triggerL").style.display = "none"
+                document.getElementById("triggerR").style.display = "none"
+
+                document.getElementById("shoulderL").style.height = "60px"
+                document.getElementById("shoulderR").style.height = "60px"
+                triggersEnabled = false
+            } else {
+                document.getElementById("triggerL").style.display = ""
+                document.getElementById("triggerR").style.display = ""
+
+                document.getElementById("shoulderL").style.height = ""
+                document.getElementById("shoulderR").style.height = ""
+                triggersEnabled = true
+            }
+        }
+
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         });
@@ -114,6 +143,16 @@
         document.ondblclick = function(e) {
             e.preventDefault();
         }
+
+        document.getElementById("reload").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            window.location.reload()
+        })
+
+        document.getElementById("toggleTriggers").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            toggleTriggers()
+        })
 
         var leftOptions = {
             zone: document.getElementById('leftStick'),

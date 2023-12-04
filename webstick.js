@@ -14,6 +14,7 @@ const qrcode = require('qrcode-terminal')
 
 http.createServer(async (req, res) => {
     if (req.url == "/joy.js") {
+        res.setHeader("Content-Type", "application/javascript")
         res.write(fs.readFileSync('./joy.js'))
         res.end()
     } else {

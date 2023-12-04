@@ -17,6 +17,7 @@
             -webkit-user-drag: none;
             -webkit-user-modify: none;
             -webkit-highlight: none;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         div {
@@ -44,9 +45,9 @@
             -webkit-user-select: none !important;
         }
 
-        .shoulder:active {
+        /* .shoulder:active {
             background-color: darkred;
-        }
+        } */
 
         .faceButton {
             background-color: blue;
@@ -58,9 +59,9 @@
             border-radius: 100px;
         }
 
-        .faceButton:active {
+        /* .faceButton:active {
             background-color: darkblue;
-        }
+        } */
     </style>
 </head>
 <body>
@@ -172,141 +173,169 @@
         })
 
         document.getElementById("faceA").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceA").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("A DOWN")
         })
 
         document.getElementById("faceA").addEventListener('touchend', (evt) => {
+            document.getElementById("faceA").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("A UP")
         })
 
         document.getElementById("faceB").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceB").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("B DOWN")
         })
 
         document.getElementById("faceB").addEventListener('touchend', (evt) => {
+            document.getElementById("faceB").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("B UP")
         })
 
         document.getElementById("faceX").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceX").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("X DOWN")
         })
 
         document.getElementById("faceX").addEventListener('touchend', (evt) => {
+            document.getElementById("faceX").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("X UP")
         })
 
         document.getElementById("faceY").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceY").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("Y DOWN")
         })
 
         document.getElementById("faceY").addEventListener('touchend', (evt) => {
+            document.getElementById("faceY").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("Y UP")
         })
 
         document.getElementById("hatN").addEventListener('touchstart', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("HAT N DOWN")
         })
 
         document.getElementById("hatN").addEventListener('touchend', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("HAT N UP")
         })
 
         document.getElementById("hatS").addEventListener('touchstart', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("HAT S DOWN")
         })
 
         document.getElementById("hatS").addEventListener('touchend', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("HAT S UP")
         })
 
         document.getElementById("hatW").addEventListener('touchstart', (evt) => {
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("HAT W DOWN")
         })
 
         document.getElementById("hatW").addEventListener('touchend', (evt) => {
+            document.getElementById("hatW").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("HAT W UP")
         })
 
         document.getElementById("hatE").addEventListener('touchstart', (evt) => {
+            document.getElementById("hatE").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("HAT E DOWN")
         })
 
         document.getElementById("hatE").addEventListener('touchend', (evt) => {
+            document.getElementById("hatE").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("HAT E UP")
         })
 
         document.getElementById("back").addEventListener('touchstart', (evt) => {
+            document.getElementById("back").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("BACK DOWN")
         })
 
         document.getElementById("back").addEventListener('touchend', (evt) => {
+            document.getElementById("back").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("BACK UP")
         })
 
         document.getElementById("start").addEventListener('touchstart', (evt) => {
+            document.getElementById("start").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("START DOWN")
         })
 
         document.getElementById("start").addEventListener('touchend', (evt) => {
+            document.getElementById("start").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("START UP")
         })
 
         document.getElementById("shoulderL").addEventListener('touchstart', (evt) => {
+            document.getElementById("shoulderL").style.backgroundColor = "darkred"
             evt.preventDefault()
             ws.send("SHOULDER L DOWN")
         })
 
         document.getElementById("shoulderL").addEventListener('touchend', (evt) => {
+            document.getElementById("shoulderL").style.backgroundColor = "red"
             evt.preventDefault()
             ws.send("SHOULDER L UP")
         })
 
         document.getElementById("shoulderR").addEventListener('touchstart', (evt) => {
+            document.getElementById("shoulderR").style.backgroundColor = "darkred"
             evt.preventDefault()
             ws.send("SHOULDER R DOWN")
         })
 
         document.getElementById("shoulderR").addEventListener('touchend', (evt) => {
+            document.getElementById("shoulderR").style.backgroundColor = "red"
             evt.preventDefault()
             ws.send("SHOULDER R UP")
         })
 
         document.getElementById("triggerL").addEventListener('touchstart', (evt) => {
+            document.getElementById("triggerL").style.backgroundColor = "darkred"
             evt.preventDefault()
             ws.send("TRIGGER L DOWN")
         })
 
         document.getElementById("triggerL").addEventListener('touchend', (evt) => {
+            document.getElementById("triggerL").style.backgroundColor = "red"
             evt.preventDefault()
             ws.send("TRIGGER L UP")
         })
 
         document.getElementById("triggerR").addEventListener('touchstart', (evt) => {
+            document.getElementById("triggerR").style.backgroundColor = "red"
             evt.preventDefault()
             ws.send("TRIGGER R DOWN")
         })
 
         document.getElementById("triggerR").addEventListener('touchend', (evt) => {
+            document.getElementById("triggerR").style.backgroundColor = "red"
             evt.preventDefault()
             ws.send("TRIGGER R UP")
         })

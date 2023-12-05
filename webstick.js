@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-console.info(`WebStick v${require('./package.json').version}\n(c) Bryle Baligad, 2023`)
+console.info(`                        WebStick v${require('./package.json').version}\n                    (c) Bryle Baligad, 2023`)
 
 //#region - vgen xbox
 const Vgen = require('@evilazio/vgen-xbox')
@@ -44,6 +44,7 @@ http.createServer(async (req, res) => {
 }).listen(8778)
 
 require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+    console.info(`--------================###  Notice  ###================--------\n\nKeep this window running to accept gamepad messages from clients\n\n--------================###----------###================--------\n`)
     console.info(`Connect to http://${add}:8778 or scan the QR code below\n`);
     qrcode.generate(`http://${add}:8778`, {small: true})
 })

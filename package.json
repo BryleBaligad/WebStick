@@ -1,6 +1,6 @@
 {
   "name": "webstick",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "web-based xinput controller",
   "main": "webstick.js",
   "scripts": {
@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@evilazio/vgen-xbox": "^1.0.3",
+    "auto-git-update": "^2.1.2",
     "qrcode-terminal": "^0.12.0",
     "ws": "^8.14.2"
   }

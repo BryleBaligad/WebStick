@@ -4,4 +4,4 @@ A nippleJS-based web browser gamepad for Windows
 ---
 
 ## To run
-Run `start.ps1` with PowerShell
+Clone this repository and run `start.ps1` with PowerShell

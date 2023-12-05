@@ -33,13 +33,22 @@ const http = require('http')
 const qrcode = require('qrcode-terminal')
 
 http.createServer(async (req, res) => {
-    if (req.url == "/joy.js") {
-        res.setHeader("Content-Type", "text/javascript")
-        res.write(fs.readFileSync('./joy.js'))
-        res.end()
-    } else {
-        res.write(fs.readFileSync('./gamepad.html'));
-        res.end()
+    switch (req.url) {
+        case "/joy.js":
+            res.setHeader("Content-Type", "text/javascript")
+            res.write(fs.readFileSync('./joy.js'))
+            res.end()
+            break;
+
+        case "/manifest.json":
+            res.setHeader("Content-Type", "application/json")
+            res.write(fs.readFileSync('./manifest.json'))
+            res.end()
+            break;
+
+        default:
+            res.write(fs.readFileSync('./gamepad.html'));
+            res.end()
     }
 }).listen(8778)
 

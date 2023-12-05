@@ -1,6 +1,6 @@
 {
   "name": "webstick",
-  "version": "0.0.11",
+  "version": "0.0.14",
   "description": "web-based xinput controller",
   "main": "webstick.js",
   "scripts": {

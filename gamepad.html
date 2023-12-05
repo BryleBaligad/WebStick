@@ -203,6 +203,10 @@
 
         var ws = new WebSocket(`ws://${document.location.hostname}:8779`)
 
+        setInterval(() => {
+            ws.send("PING!")
+        }, 5000);
+
         document.body.addEventListener('touchstart', (evt) => {
             evt.preventDefault()
         })

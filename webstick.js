@@ -181,6 +181,10 @@ wss.on('connection', (ws, req) => {
                 vgen.setButton(ws.cid, Vgen.Buttons.RIGHT_THUMB, false)
                 break;
 
+            case "PING!":
+                ws.send("PONG!")
+                break;
+
             default:
                 if (message.startsWith("LEFT STICK")) {
                     vgen.setAxisL(ws.cid, message.split(" ")[2], message.split(" ")[3])

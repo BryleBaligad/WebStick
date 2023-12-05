@@ -55,9 +55,17 @@ const WebSocketServer = require("ws").WebSocketServer;
 const wss = new WebSocketServer({port: 8779});
 
 wss.on('connection', (ws, req) => {
+    ws.ip = req.socket.remoteAddress
+
+    if (vgen.getNumEmptySlots() == 0) {
+        console.info(`${ws.ip} tried to connect, but there are no more slots`)
+        ws.send("ZERO SLOTS")
+        ws.close()
+        return;
+    }
+
     ws.controllerID = vgen.pluginNext()
     ws.cid = ws.controllerID
-    ws.ip = req.socket.remoteAddress
     console.info(`${ws.ip} connected with controller ID ${ws.cid}`)
 
     ws.on('close', () => {

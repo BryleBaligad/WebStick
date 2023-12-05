@@ -38,11 +38,12 @@
 
         .shoulder {
             background-color: red;
-            width: 150px;
-            height: 50px;
+            width: 175px;
+            height: 60px;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none !important;
+            transition: transform 0.5s ease, height 0.5s ease;
         }
 
         /* .shoulder:active {
@@ -51,8 +52,8 @@
 
         .faceButton {
             background-color: blue;
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none !important;
@@ -69,22 +70,23 @@
     </style>
 </head>
 <body>
-    <div style="position: fixed; width: 100vw; top: 0; left: 0;">
+    <div style="position: fixed; width: 100vw; top: 20px; left: 0; scale: 1.2">
         <center>
             <button id="reload">Reload</button>
             <button id="toggleTriggers">Toggle Triggers</button>
+            <button id="reconnect">Reconnect</button>
         </center>
     </div>
-    <div style="position: fixed; top: 0; left: 0">
+    <div style="position: fixed; top: 0; left: 0; z-index: 3;">
         <div id="triggerL" class="shoulder">L2</div>
         <div id="shoulderL" class="shoulder" style="border-bottom-right-radius: 50px;">L1</div>
     </div>
-    <div style="position: fixed; top: 0; right: 0">
+    <div style="position: fixed; top: 0; right: 0; z-index: 3;">
         <div id="triggerR" class="shoulder" style="text-align: right;">R2</div>
         <div id="shoulderR" class="shoulder" style="border-bottom-left-radius: 50px; text-align: right;">R1</div>
     </div>
     <center>
-        <div style="position: fixed; width: 100vw; top: 20%;">
+        <div style="position: fixed; width: 100vw; top: 25%; z-index: 2;">
             <center>
                 <div id="back" class="faceButton" style="display: inline-block">B</div>
                 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
@@ -94,22 +96,22 @@
     </center>
     <div style="position: fixed; bottom: 20px; left: 0">
         <center>
-            <div id="hatN" class="faceButton" style="touch-action: none;">N</div>
+            <div id="hatN" class="faceButton" style="touch-action: none; transform: translateY(10px)">N</div>
             <div id="hatW" class="faceButton" style="display: inline-block; touch-action: none;">W</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="hatE" class="faceButton" style="display: inline-block; touch-action: none;">E</div>
-            <div id="hatS" class="faceButton" style="touch-action: none;">S</div>
+            <div id="hatS" class="faceButton" style="touch-action: none; transform: translateY(-10px)">S</div>
         </center>
     </div>
     <div style="position: fixed; bottom: 20px; right: 0">
         <center>
-            <div id="faceX" class="faceButton" style="touch-action: none;">X</div>
+            <div id="faceX" class="faceButton" style="touch-action: none; transform: translateY(10px)">X</div>
             <div id="faceY" class="faceButton" style="display: inline-block; touch-action: none;">Y</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="faceA" class="faceButton" style="display: inline-block; touch-action: none;">A</div>
-            <div id="faceB" class="faceButton" style="touch-action: none;">B</div>
+            <div id="faceB" class="faceButton" style="touch-action: none; transform: translateY(-10px)">B</div>
         </center>
     </div>
-    <div style="position: fixed; bottom: 0; left: 150px">
+    <div style="position: fixed; bottom: 0; left: 170px">
         <div id="leftStick" style="width:150px;height:150px;margin-bottom:20px;"></div>
     </div>
-    <div style="position: fixed; bottom: 0; right: 150px">
+    <div style="position: fixed; bottom: 0; right: 170px">
         <div id="rightStick" style="width:150px;height:150px;margin-bottom:20px;"></div>
     </div>
     <script>
@@ -117,19 +119,34 @@
             window.alert("Please rotate to landscape mode")
         }
 
+        var serverLocation = `ws://${document.location.hostname}:8779`
+        var ws = new WebSocket(serverLocation)
+
+        ws.onmessage = (message) => {
+            switch (message) {
+                case "ZERO SLOTS":
+                    window.alert("Out of slots on server")
+                    break;
+            }
+        }
+
         var triggersEnabled = true
         function toggleTriggers() {
             if (triggersEnabled) {
-                document.getElementById("triggerL").style.display = "none"
-                document.getElementById("triggerR").style.display = "none"
+                document.getElementById("triggerL").style.transform = "translateY(-60px)"
+                document.getElementById("triggerR").style.transform = "translateY(-60px)"
 
-                document.getElementById("shoulderL").style.height = "60px"
-                document.getElementById("shoulderR").style.height = "60px"
+                document.getElementById("shoulderL").style.transform = "translateY(-60px)"
+                document.getElementById("shoulderR").style.transform = "translateY(-60px)"
+                document.getElementById("shoulderL").style.height = "80px"
+                document.getElementById("shoulderR").style.height = "80px"
                 triggersEnabled = false
             } else {
-                document.getElementById("triggerL").style.display = ""
-                document.getElementById("triggerR").style.display = ""
+                document.getElementById("triggerL").style.transform = ""
+                document.getElementById("triggerR").style.transform = ""
 
+                document.getElementById("shoulderL").style.transform = ""
+                document.getElementById("shoulderR").style.transform = ""
                 document.getElementById("shoulderL").style.height = ""
                 document.getElementById("shoulderR").style.height = ""
                 triggersEnabled = true
@@ -152,6 +169,15 @@
         document.getElementById("toggleTriggers").addEventListener("touchend", evt => {
             evt.preventDefault();
             toggleTriggers()
+        })
+
+        document.getElementById("reconnect").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            var response = prompt("Reconnect to server", serverLocation)
+            serverLocation = response
+            ws.close()
+            ws = null
+            ws = new WebSocket(serverLocation)
         })
 
         var leftOptions = {
@@ -200,8 +226,6 @@
         rightManager.on("end", () => {
             ws.send(`RIGHT STICK 0 0`)
         })
-
-        var ws = new WebSocket(`ws://${document.location.hostname}:8779`)
 
         setInterval(() => {
             ws.send("PING!")

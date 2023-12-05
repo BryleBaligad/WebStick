@@ -5,6 +5,26 @@ console.info(`WebStick v${require('./package.json').version}\n(c) Bryle Baligad,
 //#region - vgen xbox
 const Vgen = require('@evilazio/vgen-xbox')
 const vgen = new Vgen.VGen()
+try {
+    vgen.plugin(1)
+    vgen.unplug(1)
+} catch (e) {
+    vgen.installDriver(() => {
+        console.info("--------=========######=========--------\n\n        Installed gamepad driver\n          Open start.bat again\n\n--------=========######=========--------")
+        var seconds = 5;
+        setInterval(() => {
+            process.stdout.write(`\rClosing in ${seconds} second${seconds > 1 ? 's...     ' : '...      '}`)
+        }, 50);
+        setInterval(() => {
+            seconds -= 1;
+        }, 1000);
+        setTimeout(() => {
+            process.stdout.write("\n")
+            console.clear()
+            process.exit(0)
+        }, 5000);
+    })
+}
 
 //#endregion
 
@@ -35,13 +55,7 @@ const WebSocketServer = require("ws").WebSocketServer;
 const wss = new WebSocketServer({port: 8779});
 
 wss.on('connection', (ws, req) => {
-    try {
-        ws.controllerID = vgen.pluginNext()
-    } catch (e) {
-        vgen.installDriver(() => {
-            ws.controllerID = vgen.pluginNext()
-        })
-    }
+    ws.controllerID = vgen.pluginNext()
     ws.cid = ws.controllerID
     ws.ip = req.socket.remoteAddress
     console.info(`${ws.ip} connected with controller ID ${ws.cid}`)

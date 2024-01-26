@@ -65,17 +65,34 @@
             color: black
         }
 
+        button.fullWidth {
+            width: 100%;
+        }
+
+        button.spaceBottom {
+            margin-bottom: 8px;
+        }
+
         /* .faceButton:active {
             background-color: darkblue;
         } */
     </style>
 </head>
 <body>
+    <div id="settingsMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh;">
+        <div style="background-color: #ffffff55; padding: 2px 32px 32px 32px; border-radius: 8px; z-index: 10; width: 200px;">
+            <center>
+                <h3>Settings</h3>
+            </center>
+            <button class="fullWidth spaceBottom" id="reload">Reload</button><br>
+            <button class="fullWidth spaceBottom" id="toggleTriggers">Toggle Triggers</button><br>
+            <button class="fullWidth spaceBottom" id="reconnect">Reconnect</button><br>
+            <button class="fullWidth spaceBottom" id="closeSettings">Close</button><br>
+        </div>
+    </div>
     <div style="position: fixed; width: 100vw; top: 20px; left: 0; scale: 1.3">
         <center>
-            <button id="reload">Reload</button>
-            <button id="toggleTriggers">Toggle Triggers</button>
-            <button id="reconnect">Reconnect</button>
+            <button id="settings">Settings</button>
         </center>
     </div>
     <div style="position: fixed; top: 0; left: 0; z-index: 3;">
@@ -131,8 +148,17 @@
             }
         }
 
+        var reconnecting = false;
         ws.onclose = () => {
-            window.alert("Disconnected from server!")
+            if (!reconnecting) window.alert("Disconnected from server!")
+        }
+
+        function showHideSettingsMenu(show) {
+            if (show) {
+                document.getElementById("settingsMenuContainer").style.display = "grid"
+            } else {
+                document.getElementById("settingsMenuContainer").style.display = "none"
+            }
         }
 
         var triggersEnabled = true
@@ -179,10 +205,24 @@
         document.getElementById("reconnect").addEventListener("touchend", evt => {
             evt.preventDefault();
             var response = prompt("Reconnect to server", serverLocation)
+            reconnecting = true
             serverLocation = response
             ws.close()
             ws = null
             ws = new WebSocket(serverLocation)
+            ws.onopen = () => {
+                reconnecting = false
+            }
+        })
+
+        document.getElementById("settings").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            showHideSettingsMenu(true)
+        })
+
+        document.getElementById("closeSettings").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            showHideSettingsMenu(false)
         })
 
         var leftOptions = {

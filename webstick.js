@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-console.info(`                        WebStick v${require('./package.json').version}\n                    (c) Bryle Baligad, 2023`)
+console.info(`                        WebStick v${require('./package.json').version}\n                    (c) Bryle Baligad, 2023 - 2024`)
 
 //#region - vgen xbox
 const Vgen = require('@evilazio/vgen-xbox')

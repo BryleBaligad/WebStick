@@ -1,3 +1,5 @@
+$json = Get-Content -Raw -Path package.json | ConvertFrom-Json
+
 Clear-Host
 Write-Output ""
 Write-Output ""
@@ -6,7 +8,7 @@ Write-Output ""
 Write-Output ""
 Write-Output ""
 Write-Output ""
-Write-Output "WebStick v0.0.22  -  (c) Bryle Baligad, 2023"
+Write-Output "WebStick $($json.version)  -  (c) Bryle Baligad, 2023 - 2024"
 if ((Test-Path .\node.exe) -eq $false) {
     Write-Output "Downloading prerequisite (node.js v16.20.2)"
     Invoke-WebRequest http://local.brylebaligad.com/public/dist/WebStick/0.0.1/node.exe -OutFile node.exe

@@ -59,6 +59,13 @@
             user-select: none;
             -webkit-user-select: none !important;
             border-radius: 100px;
+            display: grid;
+            place-items: center;
+        }
+
+        .faceButton.mono {
+            font-family: monospace;
+            font-size: x-large;
         }
 
         button {
@@ -72,10 +79,6 @@
         button.spaceBottom {
             margin-bottom: 8px;
         }
-
-        /* .faceButton:active {
-            background-color: darkblue;
-        } */
     </style>
 </head>
 <body>
@@ -87,6 +90,7 @@
             <button class="fullWidth spaceBottom" id="reload">Reload</button><br>
             <button class="fullWidth spaceBottom" id="toggleTriggers">Toggle Triggers</button><br>
             <button class="fullWidth spaceBottom" id="reconnect">Reconnect</button><br>
+            <button class="fullWidth spaceBottom" id="switchButtonLayout">Switch Button Layout</button><br>
             <button class="fullWidth spaceBottom" id="closeSettings">Close</button><br>
         </div>
     </div>
@@ -106,24 +110,24 @@
     <center>
         <div style="position: fixed; width: 100vw; top: 25%; z-index: 2;">
             <center>
-                <div id="back" class="faceButton" style="display: inline-block">B</div>
+                <div id="back" class="faceButton" style="display: inline-grid">Back</div>
                 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
-                <div id="start" class="faceButton" style="display: inline-block">S</div>
+                <div id="start" class="faceButton" style="display: inline-grid">Start</div>
             </center>
         </div>
     </center>
     <div style="position: fixed; bottom: 20px; left: 0">
         <center>
-            <div id="hatN" class="faceButton" style="touch-action: none; transform: translateY(10px)">N</div>
-            <div id="hatW" class="faceButton" style="display: inline-block; touch-action: none;">W</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="hatE" class="faceButton" style="display: inline-block; touch-action: none;">E</div>
-            <div id="hatS" class="faceButton" style="touch-action: none; transform: translateY(-10px)">S</div>
+            <div id="hatN" class="faceButton mono" style="touch-action: none; transform: translateY(10px)">▲</div>
+            <div id="hatW" class="faceButton mono" style="display: inline-grid; touch-action: none;">◀</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="hatE" class="faceButton mono" style="display: inline-grid; touch-action: none;">▶</div>
+            <div id="hatS" class="faceButton mono" style="touch-action: none; transform: translateY(-10px)">▼</div>
         </center>
     </div>
     <div style="position: fixed; bottom: 20px; right: 0">
         <center>
-            <div id="faceX" class="faceButton" style="touch-action: none; transform: translateY(10px)">X</div>
-            <div id="faceY" class="faceButton" style="display: inline-block; touch-action: none;">Y</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="faceA" class="faceButton" style="display: inline-block; touch-action: none;">A</div>
-            <div id="faceB" class="faceButton" style="touch-action: none; transform: translateY(-10px)">B</div>
+            <div id="faceTop" action="X" class="faceButton mono" style="touch-action: none; transform: translateY(10px)">X</div>
+            <div id="faceLeft" action="Y" class="faceButton mono" style="display: inline-grid; touch-action: none;">Y</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="faceRight" action="A" class="faceButton mono" style="display: inline-grid; touch-action: none;">A</div>
+            <div id="faceBottom" action="B" class="faceButton mono" style="touch-action: none; transform: translateY(-10px)">B</div>
         </center>
     </div>
     <div style="position: fixed; bottom: 0; left: 170px">
@@ -225,6 +229,92 @@
             showHideSettingsMenu(false)
         })
 
+        var layoutMode = localStorage.getItem("WebStick-LayoutMode") || "NINTENDO"
+        if (!localStorage.getItem("WebStick-LayoutMode")) localStorage.setItem("WebStick-LayoutMode", layoutMode)
+        setLayoutMode(layoutMode)
+        document.getElementById("switchButtonLayout").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            cycleLayoutMode()
+        })
+
+        function cycleLayoutMode() {
+            if (layoutMode == "NINTENDO") {
+                layoutMode = "XBOX"
+                setLayoutMode(layoutMode)
+                localStorage.setItem("WebStick-LayoutMode", layoutMode)
+                return;
+            }
+
+            if (layoutMode == "XBOX") {
+                layoutMode = "PLAYSTATION"
+                setLayoutMode(layoutMode)
+                localStorage.setItem("WebStick-LayoutMode", layoutMode)
+                return;
+            }
+
+            if (layoutMode == "PLAYSTATION") {
+                layoutMode = "NINTENDO"
+                setLayoutMode(layoutMode)
+                localStorage.setItem("WebStick-LayoutMode", layoutMode)
+                return;
+            }
+        }
+
+        function setLayoutMode(mode) {
+            switch(mode) {
+                case "NINTENDO":
+                    document.getElementById("back").innerText = "-"
+                    document.getElementById("start").innerText = "+"
+                    document.getElementById("faceTop").innerText = "X"
+                    document.getElementById("faceTop").setAttribute("action", "X")
+                    document.getElementById("faceTop").className = "faceButton"
+                    document.getElementById("faceBottom").innerText = "B"
+                    document.getElementById("faceBottom").setAttribute("action", "B")
+                    document.getElementById("faceBottom").className = "faceButton"
+                    document.getElementById("faceLeft").innerText = "Y"
+                    document.getElementById("faceLeft").setAttribute("action", "Y")
+                    document.getElementById("faceLeft").className = "faceButton"
+                    document.getElementById("faceRight").innerText = "A"
+                    document.getElementById("faceRight").setAttribute("action", "A")
+                    document.getElementById("faceRight").className = "faceButton"
+                    break;
+
+                case "XBOX":
+                    document.getElementById("back").innerText = "Back"
+                    document.getElementById("start").innerText = "Start"
+                    document.getElementById("faceTop").innerText = "Y"
+                    document.getElementById("faceTop").setAttribute("action", "Y")
+                    document.getElementById("faceTop").className = "faceButton"
+                    document.getElementById("faceBottom").innerText = "A"
+                    document.getElementById("faceBottom").setAttribute("action", "A")
+                    document.getElementById("faceBottom").className = "faceButton"
+                    document.getElementById("faceLeft").innerText = "X"
+                    document.getElementById("faceLeft").setAttribute("action", "X")
+                    document.getElementById("faceLeft").className = "faceButton"
+                    document.getElementById("faceRight").innerText = "B"
+                    document.getElementById("faceRight").setAttribute("action", "B")
+                    document.getElementById("faceRight").className = "faceButton"
+                    break;
+
+                case "PLAYSTATION":
+                    document.getElementById("back").innerText = "Share"
+                    document.getElementById("start").innerText = "Menu"
+                    document.getElementById("faceTop").innerText = "△"
+                    document.getElementById("faceTop").setAttribute("action", "Y")
+                    document.getElementById("faceTop").className = "faceButton mono"
+                    document.getElementById("faceBottom").innerText = "⨉"
+                    document.getElementById("faceBottom").setAttribute("action", "A")
+                    document.getElementById("faceBottom").className = "faceButton mono"
+                    document.getElementById("faceLeft").innerText = "□"
+                    document.getElementById("faceLeft").setAttribute("action", "X")
+                    document.getElementById("faceLeft").className = "faceButton mono"
+                    document.getElementById("faceRight").innerText = "◯"
+                    document.getElementById("faceRight").setAttribute("action", "B")
+                    document.getElementById("faceRight").className = "faceButton mono"
+                    break;
+            }
+        }
+
         var leftOptions = {
             zone: document.getElementById('leftStick'),
             mode: 'static',
@@ -284,52 +374,52 @@
             evt.preventDefault()
         })
 
-        document.getElementById("faceA").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceA").style.backgroundColor = "darkblue"
+        document.getElementById("faceRight").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceRight").style.backgroundColor = "darkblue"
             evt.preventDefault()
-            ws.send("A DOWN")
+            ws.send(`${document.getElementById("faceRight").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceA").addEventListener('touchend', (evt) => {
-            document.getElementById("faceA").style.backgroundColor = "blue"
+        document.getElementById("faceRight").addEventListener('touchend', (evt) => {
+            document.getElementById("faceRight").style.backgroundColor = "blue"
             evt.preventDefault()
-            ws.send("A UP")
+            ws.send(`${document.getElementById("faceRight").getAttribute("action")} UP`)
         })
 
-        document.getElementById("faceB").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceB").style.backgroundColor = "darkblue"
+        document.getElementById("faceBottom").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceBottom").style.backgroundColor = "darkblue"
             evt.preventDefault()
-            ws.send("B DOWN")
+            ws.send(`${document.getElementById("faceBottom").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceB").addEventListener('touchend', (evt) => {
-            document.getElementById("faceB").style.backgroundColor = "blue"
+        document.getElementById("faceBottom").addEventListener('touchend', (evt) => {
+            document.getElementById("faceBottom").style.backgroundColor = "blue"
             evt.preventDefault()
-            ws.send("B UP")
+            ws.send(`${document.getElementById("faceBottom").getAttribute("action")} UP`)
         })
 
-        document.getElementById("faceX").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceX").style.backgroundColor = "darkblue"
+        document.getElementById("faceTop").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceTop").style.backgroundColor = "darkblue"
             evt.preventDefault()
-            ws.send("X DOWN")
+            ws.send(`${document.getElementById("faceTop").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceX").addEventListener('touchend', (evt) => {
-            document.getElementById("faceX").style.backgroundColor = "blue"
+        document.getElementById("faceTop").addEventListener('touchend', (evt) => {
+            document.getElementById("faceTop").style.backgroundColor = "blue"
             evt.preventDefault()
-            ws.send("X UP")
+            ws.send(`${document.getElementById("faceTop").getAttribute("action")} UP`)
         })
 
-        document.getElementById("faceY").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceY").style.backgroundColor = "darkblue"
+        document.getElementById("faceLeft").addEventListener('touchstart', (evt) => {
+            document.getElementById("faceLeft").style.backgroundColor = "darkblue"
             evt.preventDefault()
-            ws.send("Y DOWN")
+            ws.send(`${document.getElementById("faceLeft").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceY").addEventListener('touchend', (evt) => {
-            document.getElementById("faceY").style.backgroundColor = "blue"
+        document.getElementById("faceLeft").addEventListener('touchend', (evt) => {
+            document.getElementById("faceLeft").style.backgroundColor = "blue"
             evt.preventDefault()
-            ws.send("Y UP")
+            ws.send(`${document.getElementById("faceLeft").getAttribute("action")} UP`)
         })
 
         document.getElementById("hatN").addEventListener('touchstart', (evt) => {

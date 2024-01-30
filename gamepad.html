@@ -8,6 +8,14 @@
     <title>WebStick</title>
     <script src="joy.js"></script>
     <style>
+        :root {
+            --shoulder-height: 60px;
+            --left-stick-x-offset: 0px;
+            --left-stick-y-offset: 0px;
+            --right-stick-x-offset: 0px;
+            --right-stick-y-offset: 0px;
+        }
+
         * {
             touch-action: none;
             color: white;
@@ -40,16 +48,12 @@
         .shoulder {
             background-color: red;
             width: 175px;
-            height: 60px;
+            height: var(--shoulder-height);
             touch-action: none;
             user-select: none;
             -webkit-user-select: none !important;
             transition: transform 0.5s ease, height 0.5s ease;
         }
-
-        /* .shoulder:active {
-            background-color: darkred;
-        } */
 
         .faceButton {
             background-color: blue;
@@ -79,6 +83,20 @@
         button.spaceBottom {
             margin-bottom: 8px;
         }
+
+        input {
+            color: black
+        }
+
+        #leftStick {
+            transform: translateX(var(--left-stick-x-offset)) translateY(var(--left-stick-y-offset));
+            transition: transform 0.5s ease;
+        }
+
+        #rightStick {
+            transform: translateX(var(--right-stick-x-offset)) translateY(var(--right-stick-y-offset));
+            transition: transform 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -91,12 +109,33 @@
             <button class="fullWidth spaceBottom" id="toggleTriggers">Toggle Triggers</button><br>
             <button class="fullWidth spaceBottom" id="reconnect">Reconnect</button><br>
             <button class="fullWidth spaceBottom" id="switchButtonLayout">Switch Button Layout</button><br>
+            <button class="fullWidth spaceBottom" id="customiseLayout">Customise Layout</button><br>
             <button class="fullWidth spaceBottom" id="closeSettings">Close</button><br>
         </div>
     </div>
+    <div id="customiseLayoutMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh;">
+        <div style="background-color: #ffffff55; padding: 2px 32px 32px 32px; border-radius: 8px; z-index: 10; width: 350px;">
+            <center>
+                <h3>Customise Layout</h3>
+            </center>
+            <div style="display: grid; grid-template-columns: auto auto 30px 30px 50px;">
+                <span style="font-size: xx-small;">Shoulder Button Height</span><input id="shoulderHeightInput"><button ontouchend="modifyStyle('shoulderHeight', 1)">▲</button><button ontouchend="modifyStyle('shoulderHeight', -1)">▼</button><button ontouchend="modifyStyle('shoulderHeight', document.getElementById('shoulderHeightInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Left Stick X Offset</span><input id="leftStickXOffsetInput"><button ontouchend="modifyStyle('leftStickXOffset', 1)">▲</button><button ontouchend="modifyStyle('leftStickXOffset', -1)">▼</button><button ontouchend="modifyStyle('leftStickXOffset', document.getElementById('leftStickXOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Left Stick Y Offset</span><input id="leftStickYOffsetInput"><button ontouchend="modifyStyle('leftStickYOffset', 1)">▲</button><button ontouchend="modifyStyle('leftStickYOffset', -1)">▼</button><button ontouchend="modifyStyle('leftStickYOffset', document.getElementById('leftStickYOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Right Stick X Offset</span><input id="rightStickXOffsetInput"><button ontouchend="modifyStyle('rightStickXOffset', 1)">▲</button><button ontouchend="modifyStyle('rightStickXOffset', -1)">▼</button><button ontouchend="modifyStyle('rightStickXOffset', document.getElementById('rightStickXOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Right Stick Y Offset</span><input id="rightStickYOffsetInput"><button ontouchend="modifyStyle('rightStickYOffset', 1)">▲</button><button ontouchend="modifyStyle('rightStickYOffset', -1)">▼</button><button ontouchend="modifyStyle('rightStickYOffset', document.getElementById('rightStickYOffsetInput').value, true)">Apply</button>
+            </div>
+            <br>
+            <center>
+                <button style="width: 49%" id="resetStyles" ontouchend="resetStyles()">Reset Styles</button> <button style="width: 49%;" id="closeLayout">Close</button><br>
+            </center>
+        </div>
+    </div>
+    <div id=""></div>
     <div style="position: fixed; width: 100vw; top: 20px; left: 0; scale: 1.3">
         <center>
-            <button id="settings">Settings</button>
+            <button id="settings">Settings</button><br>
+            <span style="color: white; font-size: xx-small;">Controller <span id="controllerID">0</span></span>
         </center>
     </div>
     <div style="position: fixed; top: 0; left: 0; z-index: 3;">
@@ -145,10 +184,15 @@
         var ws = new WebSocket(serverLocation)
 
         ws.onmessage = (message) => {
-            switch (message) {
+            switch (message.data) {
                 case "ZERO SLOTS":
                     window.alert("Out of slots on server")
                     break;
+
+                default:
+                    if (message.data != "PONG!") {
+                        document.getElementById("controllerID").innerText = message.data
+                    }
             }
         }
 
@@ -165,16 +209,103 @@
             }
         }
 
+        function showHideLayoutMenu(show) {
+            if (show) {
+                document.getElementById("customiseLayoutMenuContainer").style.display = "grid"
+            } else {
+                document.getElementById("customiseLayoutMenuContainer").style.display = "none"
+            }
+        }
+
+        const root = document.querySelector(":root");
+        function modifyStyle(style, value, set) {
+            switch (style) {
+                case "shoulderHeight":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--shoulder-height")) + value) + "px"
+                    }
+                    root.style.setProperty("--shoulder-height", value)
+                    document.getElementById("shoulderHeightInput").value = value
+                    localStorage.setItem("shoulderHeight", value)
+                    break;
+
+                case "leftStickXOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--left-stick-x-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--left-stick-x-offset", value)
+                    document.getElementById("leftStickXOffsetInput").value = value
+                    localStorage.setItem("leftStickXOffset", value)
+                    break;
+
+                case "leftStickYOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--left-stick-y-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--left-stick-y-offset", value)
+                    document.getElementById("leftStickYOffsetInput").value = value
+                    localStorage.setItem("leftStickYOffset", value)
+                    break;
+
+                case "rightStickXOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--right-stick-x-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--right-stick-x-offset", value)
+                    document.getElementById("rightStickXOffsetInput").value = value
+                    localStorage.setItem("rightStickXOffset", value)
+                    break;
+
+                case "rightStickYOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--right-stick-y-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--right-stick-y-offset", value)
+                    document.getElementById("rightStickYOffsetInput").value = value
+                    localStorage.setItem("rightStickYOffset", value)
+                    break;
+            }
+        }
+
+        function initStyles() {
+            document.getElementById("shoulderHeightInput").value = localStorage.getItem("shoulderHeight") || "60px"
+            modifyStyle("shoulderHeight", document.getElementById("shoulderHeightInput").value, true)
+
+            document.getElementById("leftStickXOffsetInput").value = localStorage.getItem("leftStickXOffset") || "0px"
+            modifyStyle("leftStickXOffset", document.getElementById("leftStickXOffsetInput").value, true)
+
+            document.getElementById("leftStickYOffsetInput").value = localStorage.getItem("leftStickYOffset") || "0px"
+            modifyStyle("leftStickYOffset", document.getElementById("leftStickYOffsetInput").value, true)
+
+            document.getElementById("rightStickXOffsetInput").value = localStorage.getItem("rightStickXOffset") || "0px"
+            modifyStyle("rightStickXOffset", document.getElementById("rightStickXOffsetInput").value, true)
+
+            document.getElementById("rightStickYOffsetInput").value = localStorage.getItem("rightStickYOffset") || "0px"
+            modifyStyle("rightStickYOffset", document.getElementById("rightStickYOffsetInput").value, true)
+        }
+
+        initStyles()
+
+        function resetStyles() {
+            localStorage.setItem("shoulderHeight", "60px")
+            localStorage.setItem("leftStickXOffset", "0px")
+            localStorage.setItem("leftStickYOffset", "0px")
+            localStorage.setItem("rightStickXOffset", "0px")
+            localStorage.setItem("rightStickYOffset", "0px")
+
+            initStyles()
+        }
+
         var triggersEnabled = true
         function toggleTriggers() {
             if (triggersEnabled) {
-                document.getElementById("triggerL").style.transform = "translateY(-60px)"
-                document.getElementById("triggerR").style.transform = "translateY(-60px)"
+                document.getElementById("triggerL").style.transform = "translateY(calc(var(--shoulder-height) * -1))"
+                document.getElementById("triggerR").style.transform = "translateY(calc(var(--shoulder-height) * -1))"
 
-                document.getElementById("shoulderL").style.transform = "translateY(-60px)"
-                document.getElementById("shoulderR").style.transform = "translateY(-60px)"
-                document.getElementById("shoulderL").style.height = "80px"
-                document.getElementById("shoulderR").style.height = "80px"
+                document.getElementById("shoulderL").style.transform = "translateY(calc(var(--shoulder-height) * -1)x)"
+                document.getElementById("shoulderR").style.transform = "translateY(calc(var(--shoulder-height) * -1)x)"
+                document.getElementById("shoulderL").style.height = "calc(var(--shoulder-height) + 20px)"
+                document.getElementById("shoulderR").style.height = "calc(var(--shoulder-height) + 20px)"
                 triggersEnabled = false
             } else {
                 document.getElementById("triggerL").style.transform = ""
@@ -227,6 +358,18 @@
         document.getElementById("closeSettings").addEventListener("touchend", evt => {
             evt.preventDefault();
             showHideSettingsMenu(false)
+        })
+
+        document.getElementById("customiseLayout").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            showHideSettingsMenu(false)
+            showHideLayoutMenu(true)
+        })
+
+        document.getElementById("closeLayout").addEventListener("touchend", evt => {
+            evt.preventDefault();
+            showHideSettingsMenu(true)
+            showHideLayoutMenu(false)
         })
 
         var layoutMode = localStorage.getItem("WebStick-LayoutMode") || "NINTENDO"

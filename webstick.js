@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-console.info(`                        WebStick v${require('./package.json').version}\n                    (c) Bryle Baligad, 2023 - 2024`)
+console.info(`                        WebStick v${require('./package.json').version}\n                 (c) Bryle Baligad, 2023 - 2024`)
 
 //#region - vgen xbox
 const Vgen = require('@evilazio/vgen-xbox')
@@ -77,6 +77,7 @@ wss.on('connection', (ws, req) => {
     ws.controllerID = vgen.pluginNext()
     ws.cid = ws.controllerID
     console.info(`${ws.ip} connected with controller ID ${ws.cid}`)
+    ws.send(ws.cid)
 
     ws.on('close', () => {
         vgen.unplug(ws.controllerID);
@@ -184,19 +185,23 @@ wss.on('connection', (ws, req) => {
                 break;
 
             case "TRIGGER L DOWN":
-                vgen.setButton(ws.cid, Vgen.Buttons.LEFT_THUMB, true)
+                vgen.setTriggerL(ws.cid, 1);
+                // vgen.setButton(ws.cid, Vgen.Buttons.LEFT_THUMB, true)
                 break;
     
             case "TRIGGER L UP":
-                vgen.setButton(ws.cid, Vgen.Buttons.LEFT_THUMB, false)
+                vgen.setTriggerL(ws.cid, 0);
+                // vgen.setButton(ws.cid, Vgen.Buttons.LEFT_THUMB, false)
                 break;
 
             case "TRIGGER R DOWN":
-                vgen.setButton(ws.cid, Vgen.Buttons.RIGHT_THUMB, true)
+                vgen.setTriggerR(ws.cid, 1)
+                // vgen.setButton(ws.cid, Vgen.Buttons.RIGHT_THUMB, true)
                 break;
     
             case "TRIGGER R UP":
-                vgen.setButton(ws.cid, Vgen.Buttons.RIGHT_THUMB, false)
+                vgen.setTriggerR(ws.cid, 0)
+                // vgen.setButton(ws.cid, Vgen.Buttons.RIGHT_THUMB, false)
                 break;
 
             case "PING!":

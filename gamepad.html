@@ -72,6 +72,14 @@
             font-size: x-large;
         }
 
+        .faceButton.black {
+            color: black;
+        }
+
+        .faceButton.largeText {
+            font-size: xx-large;
+        }
+
         button {
             color: black
         }
@@ -135,7 +143,7 @@
     <div style="position: fixed; width: 100vw; top: 20px; left: 0; scale: 1.3">
         <center>
             <button id="settings">Settings</button><br>
-            <span style="color: white; font-size: xx-small;">Controller <span id="controllerID">0</span></span>
+            <span style="color: white; font-size: 6px;">Controller <span id="controllerID">0</span></span>
         </center>
     </div>
     <div style="position: fixed; top: 0; left: 0; z-index: 3;">
@@ -180,8 +188,9 @@
             window.alert("Please rotate to landscape mode")
         }
 
-        var serverLocation = `ws://${document.location.hostname}:8779`
+        var serverLocation = localStorage.getItem("serverLocation") || `ws://${document.location.hostname}:8779`
         var ws = new WebSocket(serverLocation)
+        localStorage.setItem("serverLocation", serverLocation)
 
         ws.onmessage = (message) => {
             switch (message.data) {
@@ -302,8 +311,8 @@
                 document.getElementById("triggerL").style.transform = "translateY(calc(var(--shoulder-height) * -1))"
                 document.getElementById("triggerR").style.transform = "translateY(calc(var(--shoulder-height) * -1))"
 
-                document.getElementById("shoulderL").style.transform = "translateY(calc(var(--shoulder-height) * -1)x)"
-                document.getElementById("shoulderR").style.transform = "translateY(calc(var(--shoulder-height) * -1)x)"
+                document.getElementById("shoulderL").style.transform = "translateY(calc(var(--shoulder-height) * -1))"
+                document.getElementById("shoulderR").style.transform = "translateY(calc(var(--shoulder-height) * -1))"
                 document.getElementById("shoulderL").style.height = "calc(var(--shoulder-height) + 20px)"
                 document.getElementById("shoulderR").style.height = "calc(var(--shoulder-height) + 20px)"
                 triggersEnabled = false
@@ -339,9 +348,11 @@
 
         document.getElementById("reconnect").addEventListener("touchend", evt => {
             evt.preventDefault();
+            serverLocation = localStorage.getItem("serverLocation")
             var response = prompt("Reconnect to server", serverLocation)
             reconnecting = true
             serverLocation = response
+            localStorage.setItem("serverLocation", serverLocation)
             ws.close()
             ws = null
             ws = new WebSocket(serverLocation)
@@ -407,53 +418,71 @@
             switch(mode) {
                 case "NINTENDO":
                     document.getElementById("back").innerText = "-"
+                    document.getElementById("back").className = "faceButton largeText"
                     document.getElementById("start").innerText = "+"
+                    document.getElementById("start").className = "faceButton largeText"
                     document.getElementById("faceTop").innerText = "X"
                     document.getElementById("faceTop").setAttribute("action", "X")
-                    document.getElementById("faceTop").className = "faceButton"
+                    document.getElementById("faceTop").className = "faceButton black"
+                    document.getElementById("faceTop").style.backgroundColor = "blue"
                     document.getElementById("faceBottom").innerText = "B"
                     document.getElementById("faceBottom").setAttribute("action", "B")
-                    document.getElementById("faceBottom").className = "faceButton"
+                    document.getElementById("faceBottom").className = "faceButton black"
+                    document.getElementById("faceBottom").style.backgroundColor = "yellow"
                     document.getElementById("faceLeft").innerText = "Y"
                     document.getElementById("faceLeft").setAttribute("action", "Y")
-                    document.getElementById("faceLeft").className = "faceButton"
+                    document.getElementById("faceLeft").className = "faceButton black"
+                    document.getElementById("faceLeft").style.backgroundColor = "green"
                     document.getElementById("faceRight").innerText = "A"
                     document.getElementById("faceRight").setAttribute("action", "A")
-                    document.getElementById("faceRight").className = "faceButton"
+                    document.getElementById("faceRight").className = "faceButton black"
+                    document.getElementById("faceRight").style.backgroundColor = "red"
                     break;
 
                 case "XBOX":
                     document.getElementById("back").innerText = "Back"
+                    document.getElementById("back").className = "faceButton"
                     document.getElementById("start").innerText = "Start"
+                    document.getElementById("start").className = "faceButton"
                     document.getElementById("faceTop").innerText = "Y"
                     document.getElementById("faceTop").setAttribute("action", "Y")
-                    document.getElementById("faceTop").className = "faceButton"
+                    document.getElementById("faceTop").className = "faceButton black"
+                    document.getElementById("faceTop").style.backgroundColor = "yellow"
                     document.getElementById("faceBottom").innerText = "A"
                     document.getElementById("faceBottom").setAttribute("action", "A")
-                    document.getElementById("faceBottom").className = "faceButton"
+                    document.getElementById("faceBottom").className = "faceButton black"
+                    document.getElementById("faceBottom").style.backgroundColor = "green"
                     document.getElementById("faceLeft").innerText = "X"
                     document.getElementById("faceLeft").setAttribute("action", "X")
-                    document.getElementById("faceLeft").className = "faceButton"
+                    document.getElementById("faceLeft").className = "faceButton black"
+                    document.getElementById("faceLeft").style.backgroundColor = "blue"
                     document.getElementById("faceRight").innerText = "B"
                     document.getElementById("faceRight").setAttribute("action", "B")
-                    document.getElementById("faceRight").className = "faceButton"
+                    document.getElementById("faceRight").className = "faceButton black"
+                    document.getElementById("faceRight").style.backgroundColor = "red"
                     break;
 
                 case "PLAYSTATION":
                     document.getElementById("back").innerText = "Share"
+                    document.getElementById("back").className = "faceButton"
                     document.getElementById("start").innerText = "Menu"
+                    document.getElementById("start").className = "faceButton"
                     document.getElementById("faceTop").innerText = "△"
                     document.getElementById("faceTop").setAttribute("action", "Y")
-                    document.getElementById("faceTop").className = "faceButton mono"
+                    document.getElementById("faceTop").className = "faceButton mono black"
+                    document.getElementById("faceTop").style.backgroundColor = "green"
                     document.getElementById("faceBottom").innerText = "⨉"
                     document.getElementById("faceBottom").setAttribute("action", "A")
-                    document.getElementById("faceBottom").className = "faceButton mono"
+                    document.getElementById("faceBottom").className = "faceButton mono black"
+                    document.getElementById("faceBottom").style.backgroundColor = "blue"
                     document.getElementById("faceLeft").innerText = "□"
                     document.getElementById("faceLeft").setAttribute("action", "X")
-                    document.getElementById("faceLeft").className = "faceButton mono"
+                    document.getElementById("faceLeft").className = "faceButton mono black"
+                    document.getElementById("faceLeft").style.backgroundColor = "pink"
                     document.getElementById("faceRight").innerText = "◯"
                     document.getElementById("faceRight").setAttribute("action", "B")
-                    document.getElementById("faceRight").className = "faceButton mono"
+                    document.getElementById("faceRight").className = "faceButton mono black"
+                    document.getElementById("faceRight").style.backgroundColor = "red"
                     break;
             }
         }
@@ -518,49 +547,49 @@
         })
 
         document.getElementById("faceRight").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceRight").style.backgroundColor = "darkblue"
+            document.getElementById("faceRight").style.filter = "brightness(0.5)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceRight").getAttribute("action")} DOWN`)
         })
 
         document.getElementById("faceRight").addEventListener('touchend', (evt) => {
-            document.getElementById("faceRight").style.backgroundColor = "blue"
+            document.getElementById("faceRight").style.filter = "brightness(1)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceRight").getAttribute("action")} UP`)
         })
 
         document.getElementById("faceBottom").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceBottom").style.backgroundColor = "darkblue"
+            document.getElementById("faceBottom").style.filter = "brightness(0.5)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceBottom").getAttribute("action")} DOWN`)
         })
 
         document.getElementById("faceBottom").addEventListener('touchend', (evt) => {
-            document.getElementById("faceBottom").style.backgroundColor = "blue"
+            document.getElementById("faceBottom").style.filter = "brightness(1)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceBottom").getAttribute("action")} UP`)
         })
 
         document.getElementById("faceTop").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceTop").style.backgroundColor = "darkblue"
+            document.getElementById("faceTop").style.filter = "brightness(0.5)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceTop").getAttribute("action")} DOWN`)
         })
 
         document.getElementById("faceTop").addEventListener('touchend', (evt) => {
-            document.getElementById("faceTop").style.backgroundColor = "blue"
+            document.getElementById("faceTop").style.filter = "brightness(1)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceTop").getAttribute("action")} UP`)
         })
 
         document.getElementById("faceLeft").addEventListener('touchstart', (evt) => {
-            document.getElementById("faceLeft").style.backgroundColor = "darkblue"
+            document.getElementById("faceLeft").style.filter = "brightness(0.5)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceLeft").getAttribute("action")} DOWN`)
         })
 
         document.getElementById("faceLeft").addEventListener('touchend', (evt) => {
-            document.getElementById("faceLeft").style.backgroundColor = "blue"
+            document.getElementById("faceLeft").style.filter = "brightness(1)"
             evt.preventDefault()
             ws.send(`${document.getElementById("faceLeft").getAttribute("action")} UP`)
         })

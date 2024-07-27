@@ -3,22 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <link rel="manifest" href="manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no; viewport-fit=cover" />
     <title>WebStick</title>
     <script src="joy.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         :root {
+            --safe-area: 0px;
             --shoulder-height: 60px;
+            --left-stick-scale: 100%;
             --left-stick-x-offset: 0px;
             --left-stick-y-offset: 0px;
+            --right-stick-scale: 100%;
             --right-stick-x-offset: 0px;
             --right-stick-y-offset: 0px;
+            --hat-scale: 100%;
+            --hat-x-offset: 0px;
+            --hat-y-offset: 0px;
         }
 
         * {
-            touch-action: none;
             color: white;
+            touch-action: none;
             user-select: none !important;
             -webkit-touch-callout: none;
             -webkit-user-callout: none;
@@ -98,17 +108,22 @@
 
         #leftStick {
             transform: translateX(var(--left-stick-x-offset)) translateY(var(--left-stick-y-offset));
-            transition: transform 0.5s ease;
+            scale: var(--left-stick-scale);
         }
 
         #rightStick {
             transform: translateX(var(--right-stick-x-offset)) translateY(var(--right-stick-y-offset));
-            transition: transform 0.5s ease;
+            scale: var(--right-stick-scale);
+        }
+
+        #hat {
+            transform: translateX(var(--hat-x-offset)) translateY(var(--hat-y-offset));
+            scale: var(--hat-scale);
         }
     </style>
 </head>
 <body>
-    <div id="settingsMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh;">
+    <div id="settingsMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh; -webkit-backdrop-filter: blur(5px); position: absolute; z-index: 10000; overflow-y: scroll;">
         <div style="background-color: #ffffff55; padding: 2px 32px 32px 32px; border-radius: 8px; z-index: 10; width: 200px;">
             <center>
                 <h3>Settings</h3>
@@ -121,21 +136,34 @@
             <button class="fullWidth spaceBottom" id="closeSettings">Close</button><br>
         </div>
     </div>
-    <div id="customiseLayoutMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh;">
-        <div style="background-color: #ffffff55; padding: 2px 32px 32px 32px; border-radius: 8px; z-index: 10; width: 350px;">
+    <div id="customiseLayoutMenuContainer" style="display: none; place-items: center; width: 100vw; max-height: 100vh; position: absolute; z-index: 10000; overflow: auto; touch-action: unset; user-select: unset; -webkit-user-drag: unset;">
+        <div style="background-color: #ffffff55; padding: 16px 32px 16px 32px; border-radius: 8px; z-index: 10; width: 350px; margin-top: 16px; margin-bottom: 16px; min-height: min-content">
             <center>
-                <h3>Customise Layout</h3>
+                <h3 style="padding: 0; margin: 0">Customise Layout</h3>
+                <select id="layouts" style="color: black" oninput="initStyles(this.value)">
+                    <option value="default">Default layout</option>
+                </select><br>
+                <span style="font-size: xx-small;">Layout Name</span> <input id="layoutName"> <button onpointerleave="saveStyle()">Save</button> <button onpointerleave="deleteStyle()">Delete</button>
             </center>
             <div style="display: grid; grid-template-columns: auto auto 30px 30px 50px;">
-                <span style="font-size: xx-small;">Shoulder Button Height</span><input id="shoulderHeightInput"><button ontouchend="modifyStyle('shoulderHeight', 1)">▲</button><button ontouchend="modifyStyle('shoulderHeight', -1)">▼</button><button ontouchend="modifyStyle('shoulderHeight', document.getElementById('shoulderHeightInput').value, true)">Apply</button>
-                <span style="font-size: xx-small;">Left Stick X Offset</span><input id="leftStickXOffsetInput"><button ontouchend="modifyStyle('leftStickXOffset', 1)">▲</button><button ontouchend="modifyStyle('leftStickXOffset', -1)">▼</button><button ontouchend="modifyStyle('leftStickXOffset', document.getElementById('leftStickXOffsetInput').value, true)">Apply</button>
-                <span style="font-size: xx-small;">Left Stick Y Offset</span><input id="leftStickYOffsetInput"><button ontouchend="modifyStyle('leftStickYOffset', 1)">▲</button><button ontouchend="modifyStyle('leftStickYOffset', -1)">▼</button><button ontouchend="modifyStyle('leftStickYOffset', document.getElementById('leftStickYOffsetInput').value, true)">Apply</button>
-                <span style="font-size: xx-small;">Right Stick X Offset</span><input id="rightStickXOffsetInput"><button ontouchend="modifyStyle('rightStickXOffset', 1)">▲</button><button ontouchend="modifyStyle('rightStickXOffset', -1)">▼</button><button ontouchend="modifyStyle('rightStickXOffset', document.getElementById('rightStickXOffsetInput').value, true)">Apply</button>
-                <span style="font-size: xx-small;">Right Stick Y Offset</span><input id="rightStickYOffsetInput"><button ontouchend="modifyStyle('rightStickYOffset', 1)">▲</button><button ontouchend="modifyStyle('rightStickYOffset', -1)">▼</button><button ontouchend="modifyStyle('rightStickYOffset', document.getElementById('rightStickYOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Safe Area</span><input id="safeAreaInput"><button onpointerleave="modifyStyle('safeArea', 1)">▲</button><button onpointerleave="modifyStyle('safeArea', -1)">▼</button><button onpointerleave="modifyStyle('safeArea', document.getElementById('safeAreaInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Shoulder Button Height</span><input id="shoulderHeightInput"><button onpointerleave="modifyStyle('shoulderHeight', 1)">▲</button><button onpointerleave="modifyStyle('shoulderHeight', -1)">▼</button><button onpointerleave="modifyStyle('shoulderHeight', document.getElementById('shoulderHeightInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Left Stick Scale</span><input id="leftStickScaleInput"><button onpointerleave="modifyStyle('leftStickScale', 1)">▲</button><button onpointerleave="modifyStyle('leftStickScale', -1)">▼</button><button onpointerleave="modifyStyle('leftStickScale', document.getElementById('leftStickScale').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Left Stick X Offset</span><input id="leftStickXOffsetInput"><button onpointerleave="modifyStyle('leftStickXOffset', 1)">▲</button><button onpointerleave="modifyStyle('leftStickXOffset', -1)">▼</button><button onpointerleave="modifyStyle('leftStickXOffset', document.getElementById('leftStickXOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Left Stick Y Offset</span><input id="leftStickYOffsetInput"><button onpointerleave="modifyStyle('leftStickYOffset', 1)">▲</button><button onpointerleave="modifyStyle('leftStickYOffset', -1)">▼</button><button onpointerleave="modifyStyle('leftStickYOffset', document.getElementById('leftStickYOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Right Stick Scale</span><input id="rightStickScaleInput"><button onpointerleave="modifyStyle('rightStickScale', 1)">▲</button><button onpointerleave="modifyStyle('rightStickScale', -1)">▼</button><button onpointerleave="modifyStyle('rightStickScale', document.getElementById('rightStickScale').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Right Stick X Offset</span><input id="rightStickXOffsetInput"><button onpointerleave="modifyStyle('rightStickXOffset', 1)">▲</button><button onpointerleave="modifyStyle('rightStickXOffset', -1)">▼</button><button onpointerleave="modifyStyle('rightStickXOffset', document.getElementById('rightStickXOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Right Stick Y Offset</span><input id="rightStickYOffsetInput"><button onpointerleave="modifyStyle('rightStickYOffset', 1)">▲</button><button onpointerleave="modifyStyle('rightStickYOffset', -1)">▼</button><button onpointerleave="modifyStyle('rightStickYOffset', document.getElementById('rightStickYOffsetInput').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Hat Scale</span><input id="hatScaleInput"><button onpointerleave="modifyStyle('hatScale', 1)">▲</button><button onpointerleave="modifyStyle('hatScale', -1)">▼</button><button onpointerleave="modifyStyle('hatScale', document.getElementById('hatScale').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Hat X Offset</span><input id="hatXOffsetInput"><button onpointerleave="modifyStyle('hatXOffset', 1)">▲</button><button onpointerleave="modifyStyle('hatXOffset', -1)">▼</button><button onpointerleave="modifyStyle('hatXOffset', document.getElementById('hatXOffset').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Hat Y Offset</span><input id="hatYOffsetInput"><button onpointerleave="modifyStyle('hatYOffset', 1)">▲</button><button onpointerleave="modifyStyle('hatYOffset', -1)">▼</button><button onpointerleave="modifyStyle('hatYOffset', document.getElementById('hatYOffset').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Face Scale</span><input id="faceScaleInput"><button onpointerleave="modifyStyle('faceScale', 1)">▲</button><button onpointerleave="modifyStyle('faceScale', -1)">▼</button><button onpointerleave="modifyStyle('faceScale', document.getElementById('faceScale').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Face X Offset</span><input id="faceXOffsetInput"><button onpointerleave="modifyStyle('faceXOffset', 1)">▲</button><button onpointerleave="modifyStyle('faceXOffset', -1)">▼</button><button onpointerleave="modifyStyle('faceXOffset', document.getElementById('faceXOffset').value, true)">Apply</button>
+                <span style="font-size: xx-small;">Face Y Offset</span><input id="faceYOffsetInput"><button onpointerleave="modifyStyle('faceYOffset', 1)">▲</button><button onpointerleave="modifyStyle('faceYOffset', -1)">▼</button><button onpointerleave="modifyStyle('faceYOffset', document.getElementById('faceYOffset').value, true)">Apply</button>
             </div>
             <br>
             <center>
-                <button style="width: 49%" id="resetStyles" ontouchend="resetStyles()">Reset Styles</button> <button style="width: 49%;" id="closeLayout">Close</button><br>
+                <button style="width: 49%" id="resetStyles" onpointerleave="resetStyles()">Reset Styles</button> <button style="width: 49%;" id="closeLayout">Close</button><br>
             </center>
         </div>
     </div>
@@ -146,11 +174,11 @@
             <span style="color: white; font-size: 6px;">Controller <span id="controllerID">0</span></span>
         </center>
     </div>
-    <div style="position: fixed; top: 0; left: 0; z-index: 3;">
+    <div style="position: fixed; top: 0; left: var(--safe-area); z-index: 3;">
         <div id="triggerL" class="shoulder">L2</div>
         <div id="shoulderL" class="shoulder" style="border-bottom-right-radius: 50px;">L1</div>
     </div>
-    <div style="position: fixed; top: 0; right: 0; z-index: 3;">
+    <div style="position: fixed; top: 0; right: var(--safe-area); z-index: 3;">
         <div id="triggerR" class="shoulder" style="text-align: right;">R2</div>
         <div id="shoulderR" class="shoulder" style="border-bottom-left-radius: 50px; text-align: right;">R1</div>
     </div>
@@ -163,29 +191,31 @@
             </center>
         </div>
     </center>
-    <div style="position: fixed; bottom: 20px; left: 0">
+    <div id="hat" style="position: fixed; bottom: 20px; left: var(--safe-area)">
         <center>
             <div id="hatN" class="faceButton mono" style="touch-action: none; transform: translateY(10px)">▲</div>
+            <div id="hatNW" class="faceButton mono" style="touch-action: none; transform: translateY(-25px) translateX(30px) rotate(-45deg) scaleX(0.5); position: absolute; opacity: 0;">▲</div> <div id="hatNE" class="faceButton mono" style="touch-action: none; transform: translateY(-25px) translateX(80px) rotate(45deg) scaleX(0.5); position: absolute; opacity: 0;">▲</div>
             <div id="hatW" class="faceButton mono" style="display: inline-grid; touch-action: none;">◀</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="hatE" class="faceButton mono" style="display: inline-grid; touch-action: none;">▶</div>
+            <div id="hatSW" class="faceButton mono" style="touch-action: none; transform: translateY(-45px) translateX(30px) rotate(45deg) scaleX(0.5); position: absolute; opacity: 0;">▼</div> <div id="hatSE" class="faceButton mono" style="touch-action: none; transform: translateY(-45px) translateX(80px) rotate(-45deg) scaleX(0.5); position: absolute; opacity: 0;">▼</div>
             <div id="hatS" class="faceButton mono" style="touch-action: none; transform: translateY(-10px)">▼</div>
         </center>
     </div>
-    <div style="position: fixed; bottom: 20px; right: 0">
+    <div id="face" style="position: fixed; bottom: 20px; right: var(--safe-area)">
         <center>
             <div id="faceTop" action="X" class="faceButton mono" style="touch-action: none; transform: translateY(10px)">X</div>
             <div id="faceLeft" action="Y" class="faceButton mono" style="display: inline-grid; touch-action: none;">Y</div> &nbsp; &nbsp; &nbsp; &nbsp; <div id="faceRight" action="A" class="faceButton mono" style="display: inline-grid; touch-action: none;">A</div>
             <div id="faceBottom" action="B" class="faceButton mono" style="touch-action: none; transform: translateY(-10px)">B</div>
         </center>
     </div>
-    <div style="position: fixed; bottom: 0; left: 170px">
-        <div id="leftStick" style="width:150px;height:150px;margin-bottom:20px;"></div>
+    <div id="leftStick" style="position: fixed; bottom: 0; left: calc(170px + var(--safe-area))">
+        <div style="width:150px;height:150px;margin-bottom:20px;"></div>
     </div>
-    <div style="position: fixed; bottom: 0; right: 170px">
-        <div id="rightStick" style="width:150px;height:150px;margin-bottom:20px;"></div>
+    <div id="rightStick" style="position: fixed; bottom: 0; right: calc(170px + var(--safe-area))">
+        <div style="width:150px;height:150px;margin-bottom:20px;"></div>
     </div>
     <script>
         if (window.matchMedia("(orientation: portrait)").matches) {
-            window.alert("Please rotate to landscape mode")
+            Toastify({text: "Please rotate to landscape mode", duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
         }
 
         var serverLocation = localStorage.getItem("serverLocation") || `ws://${document.location.hostname}:8779`
@@ -195,7 +225,7 @@
         ws.onmessage = (message) => {
             switch (message.data) {
                 case "ZERO SLOTS":
-                    window.alert("Out of slots on server")
+                    Toastify({text: "Out of controller slots on server", duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
                     break;
 
                 default:
@@ -207,7 +237,7 @@
 
         var reconnecting = false;
         ws.onclose = () => {
-            if (!reconnecting) window.alert("Disconnected from server!")
+            if (!reconnecting) Toastify({text: "Disconnected from server", duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
         }
 
         function showHideSettingsMenu(show) {
@@ -219,6 +249,17 @@
         }
 
         function showHideLayoutMenu(show) {
+            let layoutsDropdown = document.getElementById("layouts")
+            let layoutsJSON = JSON.parse(localStorage.getItem("layouts")) || {}
+            layoutsDropdown.innerHTML = `<option value="default">Default layout</option>`
+            Object.keys(layoutsJSON).sort().forEach(layout => {
+                let option = document.createElement("option")
+                option.value = layout
+                option.innerText = layout
+                layoutsDropdown.appendChild(option)
+            })
+            layoutsDropdown.value = localStorage.getItem("layoutName")
+
             if (show) {
                 document.getElementById("customiseLayoutMenuContainer").style.display = "grid"
             } else {
@@ -229,6 +270,15 @@
         const root = document.querySelector(":root");
         function modifyStyle(style, value, set) {
             switch (style) {
+                case "safeArea":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--safe-area")) + value) + "px"
+                    }
+                    root.style.setProperty("--safe-area", value)
+                    document.getElementById("safeAreaInput").value = value
+                    localStorage.setItem("safeArea", value)
+                    break;
+
                 case "shoulderHeight":
                     if (!set) {
                         value = (parseInt(getComputedStyle(root).getPropertyValue("--shoulder-height")) + value) + "px"
@@ -236,6 +286,15 @@
                     root.style.setProperty("--shoulder-height", value)
                     document.getElementById("shoulderHeightInput").value = value
                     localStorage.setItem("shoulderHeight", value)
+                    break;
+
+                case "leftStickScale":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--left-stick-scale")) + value) + "%"
+                    }
+                    root.style.setProperty("--left-stick-scale", value)
+                    document.getElementById("leftStickScaleInput").value = value
+                    localStorage.setItem("leftStickScale", value)
                     break;
 
                 case "leftStickXOffset":
@@ -256,6 +315,15 @@
                     localStorage.setItem("leftStickYOffset", value)
                     break;
 
+                case "rightStickScale":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--right-stick-scale")) + value) + "%"
+                    }
+                    root.style.setProperty("--right-stick-scale", value)
+                    document.getElementById("rightStickScaleInput").value = value
+                    localStorage.setItem("rightStickScale", value)
+                    break;
+
                 case "rightStickXOffset":
                     if (!set) {
                         value = (parseInt(getComputedStyle(root).getPropertyValue("--right-stick-x-offset")) + value) + "px"
@@ -273,36 +341,224 @@
                     document.getElementById("rightStickYOffsetInput").value = value
                     localStorage.setItem("rightStickYOffset", value)
                     break;
+
+                case "hatScale":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--hat-scale")) + value) + "%"
+                    }
+                    root.style.setProperty("--hat-scale", value)
+                    document.getElementById("hatScaleInput").value = value
+                    localStorage.setItem("hatScale", value)
+                    break;
+
+                case "hatXOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--hat-x-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--hat-x-offset", value)
+                    document.getElementById("hatXOffsetInput").value = value
+                    localStorage.setItem("hatXOffset", value)
+                    break;
+
+                case "hatYOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--hat-y-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--hat-y-offset", value)
+                    document.getElementById("hatYOffsetInput").value = value
+                    localStorage.setItem("hatYOffset", value)
+                    break;
+
+                case "faceScale":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--face-scale")) + value) + "%"
+                    }
+                    root.style.setProperty("--face-scale", value)
+                    document.getElementById("faceScaleInput").value = value
+                    localStorage.setItem("faceScale", value)
+                    break;
+
+                case "faceXOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--face-x-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--face-x-offset", value)
+                    document.getElementById("faceXOffsetInput").value = value
+                    localStorage.setItem("faceXOffset", value)
+                    break;
+
+                case "faceYOffset":
+                    if (!set) {
+                        value = (parseInt(getComputedStyle(root).getPropertyValue("--face-y-offset")) + value) + "px"
+                    }
+                    root.style.setProperty("--face-y-offset", value)
+                    document.getElementById("faceYOffsetInput").value = value
+                    localStorage.setItem("faceYOffset", value)
+                    break;
             }
         }
 
-        function initStyles() {
-            document.getElementById("shoulderHeightInput").value = localStorage.getItem("shoulderHeight") || "60px"
-            modifyStyle("shoulderHeight", document.getElementById("shoulderHeightInput").value, true)
+        function initStyles(layoutName) {
+            if (!layoutName || layoutName == "default") {
+                document.getElementById("safeAreaInput").value = "0px"
+                modifyStyle("safeArea", document.getElementById("safeAreaInput").value, true)
 
-            document.getElementById("leftStickXOffsetInput").value = localStorage.getItem("leftStickXOffset") || "0px"
-            modifyStyle("leftStickXOffset", document.getElementById("leftStickXOffsetInput").value, true)
+                document.getElementById("shoulderHeightInput").value = "60px"
+                modifyStyle("shoulderHeight", document.getElementById("shoulderHeightInput").value, true)
 
-            document.getElementById("leftStickYOffsetInput").value = localStorage.getItem("leftStickYOffset") || "0px"
-            modifyStyle("leftStickYOffset", document.getElementById("leftStickYOffsetInput").value, true)
+                document.getElementById("leftStickScaleInput").value = "100%"
+                modifyStyle("leftStickScale", document.getElementById("leftStickScaleInput").value, true)
 
-            document.getElementById("rightStickXOffsetInput").value = localStorage.getItem("rightStickXOffset") || "0px"
-            modifyStyle("rightStickXOffset", document.getElementById("rightStickXOffsetInput").value, true)
+                document.getElementById("leftStickXOffsetInput").value = "0px"
+                modifyStyle("leftStickXOffset", document.getElementById("leftStickXOffsetInput").value, true)
 
-            document.getElementById("rightStickYOffsetInput").value = localStorage.getItem("rightStickYOffset") || "0px"
-            modifyStyle("rightStickYOffset", document.getElementById("rightStickYOffsetInput").value, true)
+                document.getElementById("leftStickYOffsetInput").value = "0px"
+                modifyStyle("leftStickYOffset", document.getElementById("leftStickYOffsetInput").value, true)
+
+                document.getElementById("rightStickScaleInput").value = "100%"
+                modifyStyle("rightStickScale", document.getElementById("rightStickScaleInput").value, true)
+
+                document.getElementById("rightStickXOffsetInput").value = "0px"
+                modifyStyle("rightStickXOffset", document.getElementById("rightStickXOffsetInput").value, true)
+
+                document.getElementById("rightStickYOffsetInput").value = "0px"
+                modifyStyle("rightStickYOffset", document.getElementById("rightStickYOffsetInput").value, true)
+
+                document.getElementById("hatScaleInput").value = "100%"
+                modifyStyle("hatScale", document.getElementById("hatScaleInput").value, true)
+
+                document.getElementById("hatXOffsetInput").value = "0px"
+                modifyStyle("hatXOffset", document.getElementById("hatXOffsetInput").value, true)
+
+                document.getElementById("hatYOffsetInput").value = "0px"
+                modifyStyle("hatYOffset", document.getElementById("hatYOffsetInput").value, true)
+
+                document.getElementById("faceScaleInput").value = "100%"
+                modifyStyle("faceScale", document.getElementById("faceScaleInput").value, true)
+
+                document.getElementById("faceXOffsetInput").value = "0px"
+                modifyStyle("faceXOffset", document.getElementById("faceXOffsetInput").value, true)
+
+                document.getElementById("faceYOffsetInput").value = "0px"
+                modifyStyle("faceYOffset", document.getElementById("faceYOffsetInput").value, true)
+
+                setLayoutMode("XBOX")
+
+                document.getElementById("layoutName").value = ""
+                localStorage.setItem("layoutName", layoutName)
+                Toastify({text: "Loaded default layout", duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
+                return;
+            }
+
+            let layoutsJSON = JSON.parse(localStorage.getItem("layouts")) || {}
+            let layout = layoutsJSON[layoutName]
+            localStorage.setItem("layoutName", layoutName)
+            document.getElementById("layoutName").value = layoutName
+
+            document.getElementById("safeAreaInput").value = layout.safeArea
+            modifyStyle("safeArea", layout.safeArea, true)
+
+            document.getElementById("shoulderHeightInput").value = layout.shoulderHeight
+            modifyStyle("shoulderHeight", layout.shoulderHeight, true)
+
+            document.getElementById("leftStickScaleInput").value = layout.leftStickScale
+            modifyStyle("leftStickScale", layout.leftStickScale, true)
+
+            document.getElementById("leftStickXOffsetInput").value = layout.leftStickXOffset
+            modifyStyle("leftStickXOffset", layout.leftStickXOffset, true)
+
+            document.getElementById("leftStickYOffsetInput").value = layout.leftStickYOffset
+            modifyStyle("leftStickYOffset", layout.leftStickYOffset, true)
+
+            document.getElementById("rightStickScaleInput").value = layout.rightStickScale
+            modifyStyle("rightStickScale", layout.rightStickScale, true)
+
+            document.getElementById("rightStickXOffsetInput").value = layout.rightStickXOffset
+            modifyStyle("rightStickXOffset", layout.rightStickXOffset, true)
+
+            document.getElementById("rightStickYOffsetInput").value = layout.rightStickYOffset
+            modifyStyle("rightStickYOffset", layout.rightStickYOffset, true)
+
+            document.getElementById("hatScaleInput").value = layout.hatScale
+            modifyStyle("hatScale", layout.hatScale, true)
+
+            document.getElementById("hatXOffsetInput").value = layout.hatXOffset
+            modifyStyle("hatXOffset", layout.hatXOffset, true)
+
+            document.getElementById("hatYOffsetInput").value = layout.hatYOffset
+            modifyStyle("hatYOffset", layout.hatYOffset, true)
+
+            document.getElementById("faceScaleInput").value = layout.faceScale
+            modifyStyle("faceScale", layout.faceScale, true)
+
+            document.getElementById("faceXOffsetInput").value = layout.faceXOffset
+            modifyStyle("faceXOffset", layout.faceXOffset, true)
+
+            document.getElementById("faceYOffsetInput").value = layout.faceYOffset
+            modifyStyle("faceYOffset", layout.faceYOffset, true)
+
+            setLayoutMode(layout.buttonStyle)
+
+            Toastify({text: "Loaded layout: " + layoutName, duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
         }
 
-        initStyles()
+        initStyles(localStorage.getItem("layoutName") || "default")
 
         function resetStyles() {
+            localStorage.setItem("safeArea", "0px")
             localStorage.setItem("shoulderHeight", "60px")
+            localStorage.setItem("leftStickScale", "100%")
             localStorage.setItem("leftStickXOffset", "0px")
             localStorage.setItem("leftStickYOffset", "0px")
+            localStorage.setItem("rightStickScale", "100%")
             localStorage.setItem("rightStickXOffset", "0px")
             localStorage.setItem("rightStickYOffset", "0px")
+            localStorage.setItem("hatScale", "100%")
+            localStorage.setItem("hatXOffset", "0px")
+            localStorage.setItem("hatYOffset", "0px")
+            localStorage.setItem("faceScale", "100%")
+            localStorage.setItem("faceXOffset", "0px")
+            localStorage.setItem("faceYOffset", "0px")
 
-            initStyles()
+            initStyles("default")
+        }
+
+        function saveStyle() {
+            let name = document.getElementById("layoutName").value
+            let layoutsJSON = JSON.parse(localStorage.getItem("layouts")) || {}
+            
+            layoutsJSON[name] = {
+                safeArea: document.getElementById("safeAreaInput").value,
+                shoulderHeight: document.getElementById("shoulderHeightInput").value,
+                leftStickScale: document.getElementById("leftStickScaleInput").value,
+                leftStickXOffset: document.getElementById("leftStickXOffsetInput").value,
+                leftStickYOffset: document.getElementById("leftStickYOffsetInput").value,
+                rightStickScale: document.getElementById("rightStickScaleInput").value,
+                rightStickXOffset: document.getElementById("rightStickXOffsetInput").value,
+                rightStickYOffset: document.getElementById("rightStickYOffsetInput").value,
+                hatScale: document.getElementById("hatScaleInput").value,
+                hatXOffset: document.getElementById("hatXOffsetInput").value,
+                hatYOffset: document.getElementById("hatYOffsetInput").value,
+                faceScale: document.getElementById("faceScaleInput").value,
+                faceXOffset: document.getElementById("faceXOffsetInput").value,
+                faceYOffset: document.getElementById("faceYOffsetInput").value,
+                buttonStyle: layoutMode
+            }
+
+            localStorage.setItem("layouts", JSON.stringify(layoutsJSON))
+
+            Toastify({text: "Saved layout: " + name, duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
+        }
+
+        function deleteStyle() {
+            let name = document.getElementById("layoutName").value
+            let layoutsJSON = JSON.parse(localStorage.getItem("layouts")) || {}
+
+            delete layoutsJSON[name]
+            localStorage.setItem("layouts", JSON.stringify(layoutsJSON))
+            showHideLayoutMenu(true)
+
+            Toastify({text: "Deleted layout: " + name, duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
         }
 
         var triggersEnabled = true
@@ -336,17 +592,17 @@
             e.preventDefault();
         }
 
-        document.getElementById("reload").addEventListener("touchend", evt => {
+        document.getElementById("reload").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             window.location.reload()
         })
 
-        document.getElementById("toggleTriggers").addEventListener("touchend", evt => {
+        document.getElementById("toggleTriggers").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             toggleTriggers()
         })
 
-        document.getElementById("reconnect").addEventListener("touchend", evt => {
+        document.getElementById("reconnect").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             serverLocation = localStorage.getItem("serverLocation")
             var response = prompt("Reconnect to server", serverLocation)
@@ -361,23 +617,23 @@
             }
         })
 
-        document.getElementById("settings").addEventListener("touchend", evt => {
+        document.getElementById("settings").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             showHideSettingsMenu(true)
         })
 
-        document.getElementById("closeSettings").addEventListener("touchend", evt => {
+        document.getElementById("closeSettings").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             showHideSettingsMenu(false)
         })
 
-        document.getElementById("customiseLayout").addEventListener("touchend", evt => {
+        document.getElementById("customiseLayout").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             showHideSettingsMenu(false)
             showHideLayoutMenu(true)
         })
 
-        document.getElementById("closeLayout").addEventListener("touchend", evt => {
+        document.getElementById("closeLayout").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             showHideSettingsMenu(true)
             showHideLayoutMenu(false)
@@ -386,7 +642,7 @@
         var layoutMode = localStorage.getItem("WebStick-LayoutMode") || "NINTENDO"
         if (!localStorage.getItem("WebStick-LayoutMode")) localStorage.setItem("WebStick-LayoutMode", layoutMode)
         setLayoutMode(layoutMode)
-        document.getElementById("switchButtonLayout").addEventListener("touchend", evt => {
+        document.getElementById("switchButtonLayout").addEventListener("pointerleave", evt => {
             evt.preventDefault();
             cycleLayoutMode()
         })
@@ -538,178 +794,377 @@
             ws.send("PING!")
         }, 5000);
 
-        document.body.addEventListener('touchstart', (evt) => {
+        document.body.addEventListener('pointerenter', (evt) => {
             evt.preventDefault()
         })
 
-        document.body.addEventListener('touchend', (evt) => {
+        document.body.addEventListener('pointerleave', (evt) => {
             evt.preventDefault()
         })
 
-        document.getElementById("faceRight").addEventListener('touchstart', (evt) => {
+        document.getElementById("faceRight").addEventListener('pointerdown', (evt) => {
             document.getElementById("faceRight").style.filter = "brightness(0.5)"
+            document.getElementById("faceRight").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("faceRight").addEventListener('pointerenter', (evt) => {
+            document.getElementById("faceRight").style.filter = "brightness(0.5)"
+            document.getElementById("faceRight").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceRight").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceRight").addEventListener('touchend', (evt) => {
+        document.getElementById("faceRight").addEventListener('pointerleave', (evt) => {
             document.getElementById("faceRight").style.filter = "brightness(1)"
+            document.getElementById("faceRight").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceRight").getAttribute("action")} UP`)
         })
 
-        document.getElementById("faceBottom").addEventListener('touchstart', (evt) => {
+        document.getElementById("faceBottom").addEventListener('pointerdown', (evt) => {
             document.getElementById("faceBottom").style.filter = "brightness(0.5)"
+            document.getElementById("faceBottom").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("faceBottom").addEventListener('pointerenter', (evt) => {
+            document.getElementById("faceBottom").style.filter = "brightness(0.5)"
+            document.getElementById("faceBottom").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceBottom").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceBottom").addEventListener('touchend', (evt) => {
+        document.getElementById("faceBottom").addEventListener('pointerleave', (evt) => {
             document.getElementById("faceBottom").style.filter = "brightness(1)"
+            document.getElementById("faceBottom").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceBottom").getAttribute("action")} UP`)
         })
 
-        document.getElementById("faceTop").addEventListener('touchstart', (evt) => {
+        document.getElementById("faceTop").addEventListener('pointerdown', (evt) => {
             document.getElementById("faceTop").style.filter = "brightness(0.5)"
+            document.getElementById("faceTop").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("faceTop").addEventListener('pointerenter', (evt) => {
+            document.getElementById("faceTop").style.filter = "brightness(0.5)"
+            document.getElementById("faceTop").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceTop").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceTop").addEventListener('touchend', (evt) => {
+        document.getElementById("faceTop").addEventListener('pointerleave', (evt) => {
             document.getElementById("faceTop").style.filter = "brightness(1)"
+            document.getElementById("faceTop").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceTop").getAttribute("action")} UP`)
         })
 
-        document.getElementById("faceLeft").addEventListener('touchstart', (evt) => {
+        document.getElementById("faceLeft").addEventListener('pointerdown', (evt) => {
             document.getElementById("faceLeft").style.filter = "brightness(0.5)"
+            document.getElementById("faceLeft").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("faceLeft").addEventListener('pointerenter', (evt) => {
+            document.getElementById("faceLeft").style.filter = "brightness(0.5)"
+            document.getElementById("faceLeft").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceLeft").getAttribute("action")} DOWN`)
         })
 
-        document.getElementById("faceLeft").addEventListener('touchend', (evt) => {
+        document.getElementById("faceLeft").addEventListener('pointerleave', (evt) => {
             document.getElementById("faceLeft").style.filter = "brightness(1)"
+            document.getElementById("faceLeft").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send(`${document.getElementById("faceLeft").getAttribute("action")} UP`)
         })
 
-        document.getElementById("hatN").addEventListener('touchstart', (evt) => {
+        document.getElementById("hatN").addEventListener('pointerdown', (evt) => {
             document.getElementById("hatN").style.backgroundColor = "darkblue"
+            document.getElementById("hatN").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatN").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "darkblue"
+            document.getElementById("hatN").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("HAT N DOWN")
         })
 
-        document.getElementById("hatN").addEventListener('touchend', (evt) => {
+        document.getElementById("hatN").addEventListener('pointerleave', (evt) => {
             document.getElementById("hatN").style.backgroundColor = "blue"
+            document.getElementById("hatN").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("HAT N UP")
         })
 
-        document.getElementById("hatS").addEventListener('touchstart', (evt) => {
-            document.getElementById("hatS").style.backgroundColor = "darkblue"
-            evt.preventDefault()
-            ws.send("HAT S DOWN")
-        })
-
-        document.getElementById("hatS").addEventListener('touchend', (evt) => {
-            document.getElementById("hatS").style.backgroundColor = "blue"
-            evt.preventDefault()
-            ws.send("HAT S UP")
-        })
-
-        document.getElementById("hatW").addEventListener('touchstart', (evt) => {
-            document.getElementById("hatW").style.backgroundColor = "darkblue"
-            evt.preventDefault()
-            ws.send("HAT W DOWN")
-        })
-
-        document.getElementById("hatW").addEventListener('touchend', (evt) => {
-            document.getElementById("hatW").style.backgroundColor = "blue"
-            evt.preventDefault()
-            ws.send("HAT W UP")
-        })
-
-        document.getElementById("hatE").addEventListener('touchstart', (evt) => {
+        document.getElementById("hatNE").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "darkblue"
             document.getElementById("hatE").style.backgroundColor = "darkblue"
+            document.getElementById("hatNE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatNE").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "darkblue"
+            document.getElementById("hatE").style.backgroundColor = "darkblue"
+            document.getElementById("hatNE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT N DOWN")
+            ws.send("HAT E DOWN")
+        })
+
+        document.getElementById("hatNE").addEventListener('pointerleave', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "blue"
+            document.getElementById("hatE").style.backgroundColor = "blue"
+            document.getElementById("hatNE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT N UP")
+            ws.send("HAT E UP")
+        })
+
+        document.getElementById("hatE").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatE").style.backgroundColor = "darkblue"
+            document.getElementById("hatE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatE").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatE").style.backgroundColor = "darkblue"
+            document.getElementById("hatE").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("HAT E DOWN")
         })
 
-        document.getElementById("hatE").addEventListener('touchend', (evt) => {
+        document.getElementById("hatE").addEventListener('pointerleave', (evt) => {
             document.getElementById("hatE").style.backgroundColor = "blue"
+            document.getElementById("hatE").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("HAT E UP")
         })
 
-        document.getElementById("back").addEventListener('touchstart', (evt) => {
+        document.getElementById("hatSE").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
+            document.getElementById("hatE").style.backgroundColor = "darkblue"
+            document.getElementById("hatSE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatSE").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
+            document.getElementById("hatE").style.backgroundColor = "darkblue"
+            document.getElementById("hatSE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT S DOWN")
+            ws.send("HAT E DOWN")
+        })
+
+        document.getElementById("hatSE").addEventListener('pointerleave', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "blue"
+            document.getElementById("hatE").style.backgroundColor = "blue"
+            document.getElementById("hatSE").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT S UP")
+            ws.send("HAT E UP")
+        })
+
+        document.getElementById("hatS").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
+            document.getElementById("hatS").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatS").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
+            document.getElementById("hatS").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT S DOWN")
+        })
+
+        document.getElementById("hatS").addEventListener('pointerleave', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "blue"
+            document.getElementById("hatS").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT S UP")
+        })
+
+        document.getElementById("hatSW").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
+            document.getElementById("hatSW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatSW").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "darkblue"
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
+            document.getElementById("hatSW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT S DOWN")
+            ws.send("HAT W DOWN")
+        })
+
+        document.getElementById("hatSW").addEventListener('pointerleave', (evt) => {
+            document.getElementById("hatS").style.backgroundColor = "blue"
+            document.getElementById("hatW").style.backgroundColor = "blue"
+            document.getElementById("hatSW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT S UP")
+            ws.send("HAT W UP")
+        })
+
+        document.getElementById("hatW").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
+            document.getElementById("hatW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatW").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
+            document.getElementById("hatW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT W DOWN")
+        })
+
+        document.getElementById("hatW").addEventListener('pointerleave', (evt) => {
+            document.getElementById("hatW").style.backgroundColor = "blue"
+            document.getElementById("hatW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT W UP")
+        })
+
+        document.getElementById("hatNW").addEventListener('pointerdown', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "darkblue"
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
+            document.getElementById("hatNW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("hatNW").addEventListener('pointerenter', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "darkblue"
+            document.getElementById("hatW").style.backgroundColor = "darkblue"
+            document.getElementById("hatNW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT N DOWN")
+            ws.send("HAT E DOWN")
+        })
+
+        document.getElementById("hatNW").addEventListener('pointerleave', (evt) => {
+            document.getElementById("hatN").style.backgroundColor = "blue"
+            document.getElementById("hatW").style.backgroundColor = "blue"
+            document.getElementById("hatNW").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("HAT N UP")
+            ws.send("HAT W UP")
+        })
+
+        document.getElementById("back").addEventListener('pointerenter', (evt) => {
             document.getElementById("back").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("BACK DOWN")
         })
 
-        document.getElementById("back").addEventListener('touchend', (evt) => {
+        document.getElementById("back").addEventListener('pointerleave', (evt) => {
             document.getElementById("back").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("BACK UP")
         })
 
-        document.getElementById("start").addEventListener('touchstart', (evt) => {
+        document.getElementById("start").addEventListener('pointerenter', (evt) => {
             document.getElementById("start").style.backgroundColor = "darkblue"
             evt.preventDefault()
             ws.send("START DOWN")
         })
 
-        document.getElementById("start").addEventListener('touchend', (evt) => {
+        document.getElementById("start").addEventListener('pointerleave', (evt) => {
             document.getElementById("start").style.backgroundColor = "blue"
             evt.preventDefault()
             ws.send("START UP")
         })
 
-        document.getElementById("shoulderL").addEventListener('touchstart', (evt) => {
+        document.getElementById("shoulderL").addEventListener('pointerdown', (evt) => {
             document.getElementById("shoulderL").style.backgroundColor = "darkred"
+            document.getElementById("shoulderL").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+        })
+
+        document.getElementById("shoulderL").addEventListener('pointerenter', (evt) => {
+            document.getElementById("shoulderL").style.backgroundColor = "darkred"
+            document.getElementById("shoulderL").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("SHOULDER L DOWN")
         })
 
-        document.getElementById("shoulderL").addEventListener('touchend', (evt) => {
+        document.getElementById("shoulderL").addEventListener('pointerleave', (evt) => {
             document.getElementById("shoulderL").style.backgroundColor = "red"
+            document.getElementById("shoulderL").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("SHOULDER L UP")
         })
 
-        document.getElementById("shoulderR").addEventListener('touchstart', (evt) => {
+        document.getElementById("shoulderR").addEventListener('pointerdown', (evt) => {
             document.getElementById("shoulderR").style.backgroundColor = "darkred"
+            document.getElementById("shoulderR").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("SHOULDER R DOWN")
         })
 
-        document.getElementById("shoulderR").addEventListener('touchend', (evt) => {
+        document.getElementById("shoulderR").addEventListener('pointerenter', (evt) => {
+            document.getElementById("shoulderR").style.backgroundColor = "darkred"
+            document.getElementById("shoulderR").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("SHOULDER R DOWN")
+        })
+
+        document.getElementById("shoulderR").addEventListener('pointerleave', (evt) => {
             document.getElementById("shoulderR").style.backgroundColor = "red"
+            document.getElementById("shoulderR").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("SHOULDER R UP")
         })
 
-        document.getElementById("triggerL").addEventListener('touchstart', (evt) => {
+        document.getElementById("triggerL").addEventListener('pointerdown', (evt) => {
             document.getElementById("triggerL").style.backgroundColor = "darkred"
+            document.getElementById("triggerL").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("TRIGGER L DOWN")
         })
 
-        document.getElementById("triggerL").addEventListener('touchend', (evt) => {
+        document.getElementById("triggerL").addEventListener('pointerenter', (evt) => {
+            document.getElementById("triggerL").style.backgroundColor = "darkred"
+            document.getElementById("triggerL").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("TRIGGER L DOWN")
+        })
+
+        document.getElementById("triggerL").addEventListener('pointerleave', (evt) => {
             document.getElementById("triggerL").style.backgroundColor = "red"
+            document.getElementById("triggerL").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("TRIGGER L UP")
         })
 
-        document.getElementById("triggerR").addEventListener('touchstart', (evt) => {
+        document.getElementById("triggerR").addEventListener('pointerdown', (evt) => {
             document.getElementById("triggerR").style.backgroundColor = "darkred"
+            document.getElementById("triggerR").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("TRIGGER R DOWN")
         })
 
-        document.getElementById("triggerR").addEventListener('touchend', (evt) => {
+        document.getElementById("triggerR").addEventListener('pointerenter', (evt) => {
+            document.getElementById("triggerR").style.backgroundColor = "darkred"
+            document.getElementById("triggerR").releasePointerCapture(evt.pointerId)
+            evt.preventDefault()
+            ws.send("TRIGGER R DOWN")
+        })
+
+        document.getElementById("triggerR").addEventListener('pointerleave', (evt) => {
             document.getElementById("triggerR").style.backgroundColor = "red"
+            document.getElementById("triggerR").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
             ws.send("TRIGGER R UP")
         })

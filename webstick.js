@@ -40,6 +40,12 @@ http.createServer(async (req, res) => {
             res.end()
             break;
 
+        case "/lowLag.js":
+            res.setHeader("Content-Type", "text/javascript")
+            res.write(fs.readFileSync('./lowLag.js'))
+            res.end()
+            break;
+
         case "/manifest.json":
             res.setHeader("Content-Type", "application/json")
             res.write(fs.readFileSync('./manifest.json'))
@@ -78,6 +84,15 @@ wss.on('connection', (ws, req) => {
     ws.cid = ws.controllerID
     console.info(`${ws.ip} connected with controller ID ${ws.cid}`)
     ws.send(ws.cid)
+
+    let emitter = vgen.createEventEmitter(ws.cid);
+    emitter.on("vibrate_on", ({left, right}) => {
+        ws.send("VIBRATE ON")
+    })
+
+    emitter.on("vibrate_off", () => {
+        ws.send("VIBRATE OFF")
+    })
 
     ws.on('close', () => {
         vgen.unplug(ws.controllerID);
@@ -151,6 +166,39 @@ wss.on('connection', (ws, req) => {
             case "HAT E UP":
                 vgen.setDpad(ws.cid, Vgen.Dpad.NONE)
                 break;
+
+            case "HAT NW DOWN":
+                vgen.setDpad(ws.cid, Vgen.Dpad.UP_LEFT);
+                break;
+
+            case "HAT NW UP":
+                vgen.setDpad(ws.cid, Vgen.Dpad.NONE);
+                break;
+
+            case "HAT SW DOWN":
+                vgen.setDpad(ws.cid, Vgen.Dpad.DOWN_LEFT);
+                break;
+
+            case "HAT SW UP":
+                vgen.setDpad(ws.cid, Vgen.Dpad.NONE);
+                break;
+
+            case "HAT NE DOWN":
+                vgen.setDpad(ws.cid, Vgen.Dpad.UP_RIGHT);
+                break;
+
+            case "HAT NE UP":
+                vgen.setDpad(ws.cid, Vgen.Dpad.NONE);
+                break;
+
+            case "HAT SE DOWN":
+                vgen.setDpad(ws.cid, Vgen.Dpad.DOWN_RIGHT);
+                break;
+
+            case "HAT SW UP":
+                vgen.setDpad(ws.cid, Vgen.Dpad.NONE);
+                break;
+
 
             case "BACK DOWN":
                 vgen.setButton(ws.cid, Vgen.Buttons.BACK, true)

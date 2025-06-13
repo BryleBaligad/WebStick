@@ -123,7 +123,10 @@
     </style>
 </head>
 <body>
-    <div id="settingsMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh; -webkit-backdrop-filter: blur(5px); position: absolute; z-index: 10000; overflow-y: scroll;">
+    <div id="vibrationContainer" style="display: grid; place-items: center; width: 100vw; height: 100vh; backdrop-filter: blur(5px); position: absolute; z-index: 10000; overflow-y: scroll;">
+        <button onclick="enableVibration()" style="scale: 2">Push this button to enable vibration</button><br>
+    </div>
+    <div id="settingsMenuContainer" style="display: none; place-items: center; width: 100vw; height: 100vh; backdrop-filter: blur(5px); position: absolute; z-index: 10000; overflow-y: scroll;">
         <div style="background-color: #ffffff55; padding: 2px 32px 32px 32px; border-radius: 8px; z-index: 10; width: 200px;">
             <center>
                 <h3>Settings</h3>
@@ -221,11 +224,22 @@
         var serverLocation = localStorage.getItem("serverLocation") || `ws://${document.location.hostname}:8779`
         var ws = new WebSocket(serverLocation)
         localStorage.setItem("serverLocation", serverLocation)
+        let ctx;
+        let oscillator;
+        let gain;
 
         ws.onmessage = (message) => {
             switch (message.data) {
                 case "ZERO SLOTS":
                     Toastify({text: "Out of controller slots on server", duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
+                    break;
+
+                case "VIBRATE ON":
+                    gain.gain.setTargetAtTime(10, ctx.currentTime, 0.01);
+                    break;
+
+                case "VIBRATE OFF":
+                    gain.gain.setTargetAtTime(0, ctx.currentTime, 0.005);
                     break;
 
                 default:
@@ -238,6 +252,20 @@
         var reconnecting = false;
         ws.onclose = () => {
             if (!reconnecting) Toastify({text: "Disconnected from server", duration: 3000, style: { background: "grey", boxShadow: "unset" }}).showToast()
+        }
+
+        function enableVibration() {
+            document.getElementById("vibrationContainer").style.display = "none";
+            ctx = new AudioContext();
+            gain = ctx.createGain();
+            oscillator = ctx.createOscillator();
+            oscillator.type = "sine"
+            oscillator.frequency.setValueAtTime(50, ctx.currentTime)
+            oscillator.connect(gain);
+            oscillator.start()
+
+            gain.gain.setTargetAtTime(0, ctx.currentTime, 0.01);
+            gain.connect(ctx.destination)
         }
 
         function showHideSettingsMenu(show) {
@@ -914,8 +942,7 @@
             document.getElementById("hatE").style.backgroundColor = "darkblue"
             document.getElementById("hatNE").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT N DOWN")
-            ws.send("HAT E DOWN")
+            ws.send("HAT NE DOWN")
         })
 
         document.getElementById("hatNE").addEventListener('pointerleave', (evt) => {
@@ -923,8 +950,7 @@
             document.getElementById("hatE").style.backgroundColor = "blue"
             document.getElementById("hatNE").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT N UP")
-            ws.send("HAT E UP")
+            ws.send("HAT NE UP")
         })
 
         document.getElementById("hatE").addEventListener('pointerdown', (evt) => {
@@ -959,8 +985,7 @@
             document.getElementById("hatE").style.backgroundColor = "darkblue"
             document.getElementById("hatSE").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT S DOWN")
-            ws.send("HAT E DOWN")
+            ws.send("HAT SE DOWN")
         })
 
         document.getElementById("hatSE").addEventListener('pointerleave', (evt) => {
@@ -968,8 +993,7 @@
             document.getElementById("hatE").style.backgroundColor = "blue"
             document.getElementById("hatSE").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT S UP")
-            ws.send("HAT E UP")
+            ws.send("HAT SE UP")
         })
 
         document.getElementById("hatS").addEventListener('pointerdown', (evt) => {
@@ -1004,8 +1028,7 @@
             document.getElementById("hatW").style.backgroundColor = "darkblue"
             document.getElementById("hatSW").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT S DOWN")
-            ws.send("HAT W DOWN")
+            ws.send("HAT SW DOWN")
         })
 
         document.getElementById("hatSW").addEventListener('pointerleave', (evt) => {
@@ -1013,8 +1036,7 @@
             document.getElementById("hatW").style.backgroundColor = "blue"
             document.getElementById("hatSW").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT S UP")
-            ws.send("HAT W UP")
+            ws.send("HAT SW UP")
         })
 
         document.getElementById("hatW").addEventListener('pointerdown', (evt) => {
@@ -1049,8 +1071,7 @@
             document.getElementById("hatW").style.backgroundColor = "darkblue"
             document.getElementById("hatNW").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT N DOWN")
-            ws.send("HAT E DOWN")
+            ws.send("HAT NW DOWN")
         })
 
         document.getElementById("hatNW").addEventListener('pointerleave', (evt) => {
@@ -1058,8 +1079,7 @@
             document.getElementById("hatW").style.backgroundColor = "blue"
             document.getElementById("hatNW").releasePointerCapture(evt.pointerId)
             evt.preventDefault()
-            ws.send("HAT N UP")
-            ws.send("HAT W UP")
+            ws.send("HAT NW UP")
         })
 
         document.getElementById("back").addEventListener('pointerenter', (evt) => {
